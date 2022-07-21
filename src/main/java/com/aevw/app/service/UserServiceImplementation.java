@@ -5,6 +5,7 @@ import com.aevw.app.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.util.List;
 import java.util.Optional;
 
@@ -45,9 +46,9 @@ public class UserServiceImplementation implements UserService {
     public void addNewUser(AppUser user) {
 
         Optional<AppUser> userByEmail = userRepository.findAppUserByEmail(user.getEmail());
-
+        
         if(userByEmail.isPresent()){
-            throw new IllegalStateException("404, email already registered");
+            throw new IllegalStateException("Email already registered");
         }
 
         userRepository.save(user);

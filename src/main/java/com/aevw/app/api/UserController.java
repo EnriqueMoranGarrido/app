@@ -3,10 +3,12 @@ package com.aevw.app.api;
 import com.aevw.app.entity.AppUser;
 import com.aevw.app.repository.UserRepository;
 import com.aevw.app.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 
@@ -14,12 +16,12 @@ import java.util.List;
 @RequestMapping(path = "/api")
 public class UserController {
 
-    private final UserService userService;
-    private final UserRepository userRepository;
 
-    public UserController(UserService userService, UserRepository userRepository) {
+    private final UserService userService;
+
+
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.userRepository = userRepository;
     }
 
     @GetMapping("/all-users")
@@ -37,12 +39,20 @@ public class UserController {
 
     @PostMapping("/users/signup")
     public ResponseEntity<List<AppUser>> saveAllUsers(@RequestBody List<AppUser> users){
-        System.out.println(users.stream().map(m->m.getEmail()));
+        System.out.println(users.stream().map(AppUser::getEmail));
         return null;
     }
 
     @PostMapping("usr/signup")
-    public void addUser(@RequestBody AppUser user){
+    public void addUser(@Valid @RequestBody  AppUser user){
         userService.addNewUser(user);
     }
+
+    @PostMapping("userr/signup")
+    public ResponseEntity<AppUser> createUser(@Valid @RequestBody AppUser user){
+        AppUser savedUser = userService.saveUser(user);
+        return new ResponseEntity<>(savedUser,HttpStatus.CREATED);
+    }
+
+
 }
