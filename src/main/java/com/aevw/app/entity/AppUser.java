@@ -16,6 +16,7 @@ import java.time.Period;
 @Entity
 //@Table(name="users")
 public class AppUser {
+
     @Id
     private String id;
     @NotBlank(message = "First name is mandatory")
@@ -27,6 +28,7 @@ public class AppUser {
 
     @Past(message = "Birthdate should be past")
     private LocalDate birthDate;
+
     @NotBlank(message = "Email is mandatory")
     @Email(message = "email should be a valid email format")
     private String email;
@@ -40,6 +42,8 @@ public class AppUser {
     public AppUser() {
 
     }
+
+
 
     public AppUser(String id, String firstName, String lastName, LocalDate birthDate, String email, String password, Integer age) {
         this.id = id;

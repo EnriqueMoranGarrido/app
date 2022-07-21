@@ -50,9 +50,14 @@ public class UserController {
 
     @PostMapping("userr/signup")
     public ResponseEntity<AppUser> createUser(@Valid @RequestBody AppUser user){
-        AppUser savedUser = userService.saveUser(user);
+        AppUser savedUser = userService.addUser(user);
         return new ResponseEntity<>(savedUser,HttpStatus.CREATED);
     }
+    @PostMapping("user/login")
+    public void loginUser(@Valid @RequestBody String credentials){
 
+        userService.tryingToLogInUser(credentials);
+
+    }
 
 }
