@@ -1,6 +1,7 @@
 package com.aevw.app.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -12,6 +13,7 @@ import javax.validation.constraints.Size;
 import java.net.http.HttpRequest;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.Map;
 
 @Entity
 //@Table(name="users")
@@ -38,6 +40,18 @@ public class AppUser {
 
     @Transient
     private Integer age;
+
+    public Map<String, String> getToken() {
+        return token;
+    }
+
+    public void setToken(Map<String, String> token) {
+        this.token = token;
+    }
+
+    @Transient
+    @JsonFormat
+    private Map<String,String> token;
 
     public AppUser() {
 
@@ -71,6 +85,9 @@ public class AppUser {
         this.email = email;
         this.password = password;
     }
+
+
+
 
     public Integer getAge() {
         return Period.between(this.birthDate,LocalDate.now()).getYears();

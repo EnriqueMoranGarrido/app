@@ -3,14 +3,20 @@ package com.aevw.app.api;
 import com.aevw.app.entity.AppUser;
 import com.aevw.app.repository.UserRepository;
 import com.aevw.app.service.UserService;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/api")
@@ -54,9 +60,20 @@ public class UserController {
         return new ResponseEntity<>(savedUser,HttpStatus.CREATED);
     }
     @PostMapping("user/login")
-    public void loginUser(@Valid @RequestBody String credentials){
+    public ResponseEntity<Map<String,String>> loginUser(@Valid @RequestBody String credentials){
 
-        userService.tryingToLogInUser(credentials);
+        Map<String,String> returnValue = userService.tryingToLogInUser(credentials);
+
+        userService.getUser(returnValue.get("email")).setToken(returnValue);
+        System.out.println(userService.getUser(returnValue.get("email")).getToken());
+        return ResponseEntity.status(HttpStatus.OK).body(returnValue);
+
+    }
+
+    @PostMapping("user/logout")
+    public void logoutUser( String accessToken){
+
+        userService.tryingToLogInUser(accessToken);
 
     }
 

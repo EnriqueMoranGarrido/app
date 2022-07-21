@@ -1,9 +1,11 @@
 package com.aevw.app.service;
 
 import com.aevw.app.entity.AppUser;
+import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserService {
     AppUser saveUser(AppUser user);
@@ -16,5 +18,5 @@ public interface UserService {
     AppUser addUser(AppUser user);
 
 
-    void tryingToLogInUser(String credentials);
+    Map<String,String> tryingToLogInUser(String credentials);
 }

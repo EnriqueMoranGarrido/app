@@ -3,6 +3,9 @@ package com.aevw.app.service;
 import com.aevw.app.entity.AppUser;
 import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.repository.UserRepository;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.JSONPObject;
@@ -19,13 +22,22 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Service @Transactional @Slf4j
 public class UserServiceImplementation implements UserService, UserDetailsService {
 
     @Autowired
     private  UserRepository userRepository;
+
+    @Autowired
+    private HttpServletResponse servletResponse;
 
 //    public UserServiceImplementation(UserRepository userRepository) {
 //        this.userRepository = userRepository;
@@ -114,7 +126,7 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
 
 
     @Override
-    public void tryingToLogInUser(String credentials) {
+    public Map<String,String> tryingToLogInUser(String credentials)  {
         JSONObject root = new JSONObject(credentials);
         String email = (String) root.get("email");
         String password = (String) root.get("password");
@@ -125,7 +137,58 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
         if(Objects.equals(myUser.getPassword(), password)) {
             System.out.println(myUser.getPassword());
             log.info("User found {} with email {}", myUser.getFirstName(),myUser.getEmail() );
+
+            Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
+
+            String accessToken = JWT.create()
+                    .withJWTId(myUser.getId().concat(email) )
+                    .withSubject(myUser.getFirstName()+"_"+myUser.getLastName() + "_" + email)
+                    .withExpiresAt(new Date(System.currentTimeMillis() + 50*60*1000))
+                    .sign(algorithm);
+
+
+            servletResponse.setHeader("acces_token",accessToken);
+
+            root.put("access_token",accessToken);
+
+
+
+
+
+            Map<String,String> token = new HashMap<>();
+
+            token.put("id", myUser.getId());
+            token.put("email", email);
+            token.put("token", " Bearer " + accessToken);
+
+
+
+//            userRepository.findByEmail(email).setToken(token);
+
+            System.out.println(root);
+
+            return token;
+
+//
+//
+//            servletResponse.setContentType(APPLICATION_JSON_VALUE);
+
+//            JSONObject myResponse = new JSONObject();
+//            myResponse.put("email",email);
+//            myResponse.put("password", password);
+//            myResponse.put("access_token", accessToken);
+//
+//            try {
+//                new ObjectMapper().writeValue(servletResponse.getOutputStream(),myResponse);
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+
+
+
+
         }
+        return null;
 
     }
 
