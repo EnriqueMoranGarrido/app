@@ -19,4 +19,6 @@ public interface UserService {
 
 
     Map<String,String> tryingToLogInUser(String credentials);
+
+    void logoutUser(Map<String,String> token);
 }

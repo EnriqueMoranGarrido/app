@@ -3,6 +3,8 @@ package com.aevw.app.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.persistence.*;
@@ -60,30 +62,35 @@ public class AppUser {
 
 
     public AppUser(String id, String firstName, String lastName, LocalDate birthDate, String email, String password, Integer age) {
+
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthDate = birthDate;
         this.email = email;
-        this.password = password;
+        this.password = passwordEncoder.encode(password);
         this.age = age;
     }
 
     public AppUser(String firstName, String lastName, LocalDate birthDate, String email, String password) {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthDate = birthDate;
         this.email = email;
-        this.password = password;
+        this.password = passwordEncoder.encode(password);
     }
 
     public AppUser(String id, String firstName, String lastName, LocalDate birthDate, String email, String password) {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthDate = birthDate;
         this.email = email;
-        this.password = password;
+        this.password = passwordEncoder.encode(password);
     }
 
 
@@ -143,6 +150,7 @@ public class AppUser {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        this.password = passwordEncoder.encode(password);
     }
 }

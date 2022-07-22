@@ -5,9 +5,11 @@ import com.aevw.app.repository.UserRepository;
 import com.aevw.app.service.UserService;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.json.JSONObject;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.function.ServerResponse;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServlet;
@@ -71,10 +73,18 @@ public class UserController {
     }
 
     @PostMapping("user/logout")
-    public void logoutUser( String accessToken){
+    public ResponseEntity<Map<String,String>> usingResponseEntityBuilderAndHttpHeaders() {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set("Baeldung-Example-Header",
+                "Value-ResponseEntityBuilderWithHttpHeaders");
 
-        userService.tryingToLogInUser(accessToken);
+        Map<String, String> myMap = new HashMap<>();
 
+        myMap.put("Authentication","Beaver xxxx");
+
+        return ResponseEntity.ok()
+                .headers(responseHeaders)
+                .body(myMap);
     }
 
 }

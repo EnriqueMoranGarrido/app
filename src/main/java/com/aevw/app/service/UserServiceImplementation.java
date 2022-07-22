@@ -19,6 +19,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -123,18 +125,27 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
 
     }
 
+    @Override
+    public void logoutUser(Map<String,String> token){
+        System.out.println("token no longer valid");
+    }
+
 
 
     @Override
     public Map<String,String> tryingToLogInUser(String credentials)  {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         JSONObject root = new JSONObject(credentials);
         String email = (String) root.get("email");
-        String password = (String) root.get("password");
+        String password = (String) root.get("password");;
+
+
         AppUser myUser = userRepository.findByEmail(email);
         if(myUser == null){
             throw new ApiRequestException("Invalid credentials");
         }
-        if(Objects.equals(myUser.getPassword(), password)) {
+
+        if(passwordEncoder.matches(password,myUser.getPassword())){
             System.out.println(myUser.getPassword());
             log.info("User found {} with email {}", myUser.getFirstName(),myUser.getEmail() );
 
@@ -150,10 +161,6 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
             servletResponse.setHeader("acces_token",accessToken);
 
             root.put("access_token",accessToken);
-
-
-
-
 
             Map<String,String> token = new HashMap<>();
 
@@ -188,7 +195,7 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
 
 
         }
-        return null;
+        throw new ApiRequestException("Invalid credentials");
 
     }
 
