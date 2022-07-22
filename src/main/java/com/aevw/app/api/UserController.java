@@ -56,11 +56,13 @@ public class UserController {
 //        userService.addNewUser(user);
 //    }
 
-    @PostMapping("signup")
-    public ResponseEntity<AppUser> createUser(@Valid @RequestBody AppUser user){
-        AppUser savedUser = userService.addUser(user);
-        return new ResponseEntity<>(savedUser,HttpStatus.CREATED);
-    }
+//    @PostMapping("signup")
+//    public ResponseEntity<AppUser> createUser(@Valid @RequestBody AppUser user){
+//        AppUser savedUser = userService.addUser(user);
+//        return new ResponseEntity<>(savedUser,HttpStatus.CREATED);
+//    }
+
+
     @PostMapping("login")
     public ResponseEntity<Map<String,String>> loginUser(@Valid @RequestBody String credentials){
 
