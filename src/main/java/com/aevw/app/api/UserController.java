@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(path = "/api")
+@RequestMapping(path = "/user")
 public class UserController {
 
 
@@ -56,12 +56,12 @@ public class UserController {
         userService.addNewUser(user);
     }
 
-    @PostMapping("userr/signup")
+    @PostMapping("signup")
     public ResponseEntity<AppUser> createUser(@Valid @RequestBody AppUser user){
         AppUser savedUser = userService.addUser(user);
         return new ResponseEntity<>(savedUser,HttpStatus.CREATED);
     }
-    @PostMapping("user/login")
+    @PostMapping("login")
     public ResponseEntity<Map<String,String>> loginUser(@Valid @RequestBody String credentials){
 
         Map<String,String> returnValue = userService.tryingToLogInUser(credentials);
@@ -72,7 +72,7 @@ public class UserController {
 
     }
 
-    @PostMapping("user/logout")
+    @PostMapping("logout")
     public ResponseEntity<Map<String,String>> usingResponseEntityBuilderAndHttpHeaders() {
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("Baeldung-Example-Header",

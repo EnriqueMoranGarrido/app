@@ -15,7 +15,9 @@ import javax.validation.constraints.Size;
 import java.net.http.HttpRequest;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.TimeZone;
 
 @Entity
 //@Table(name="users")
@@ -35,6 +37,7 @@ public class AppUser {
 
     @NotBlank(message = "Email is mandatory")
     @Email(message = "email should be a valid email format")
+    @Column(name = "email", unique = true)
     private String email;
     @NotBlank(message = "Password is mandatory")
     @Size(min = 2, message = "Password should have at least 2 characters")
@@ -54,6 +57,20 @@ public class AppUser {
     @Transient
     @JsonFormat
     private Map<String,String> token;
+
+    private Boolean isActive = true;
+
+    private Integer loginCount;
+
+    private String ssoType;
+
+    private ZonedDateTime loginAt;
+
+    private ZonedDateTime createdAt;
+
+    private ZonedDateTime updatedAt;
+
+    private String userType;
 
     public AppUser() {
 
