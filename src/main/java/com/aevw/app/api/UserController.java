@@ -37,24 +37,24 @@ public class UserController {
         return ResponseEntity.ok().body(userService.getUsers());
     }
 
-    @PostMapping("/user/signup")
-    public ResponseEntity<AppUser> saveUser(@RequestBody AppUser user){
-
-        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/user/save").toUriString());
-
-        return ResponseEntity.created(uri).body(userService.saveUser(user));
-    }
-
-    @PostMapping("/users/signup")
-    public ResponseEntity<List<AppUser>> saveAllUsers(@RequestBody List<AppUser> users){
-        System.out.println(users.stream().map(AppUser::getEmail));
-        return null;
-    }
-
-    @PostMapping("usr/signup")
-    public void addUser(@Valid @RequestBody  AppUser user){
-        userService.addNewUser(user);
-    }
+//    @PostMapping("/user/signup")
+//    public ResponseEntity<AppUser> saveUser(@RequestBody AppUser user){
+//
+//        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("api/user/save").toUriString());
+//
+//        return ResponseEntity.created(uri).body(userService.saveUser(user));
+//    }
+//
+//    @PostMapping("/users/signup")
+//    public ResponseEntity<List<AppUser>> saveAllUsers(@RequestBody List<AppUser> users){
+//        System.out.println(users.stream().map(AppUser::getEmail));
+//        return null;
+//    }
+//
+//    @PostMapping("usr/signup")
+//    public void addUser(@Valid @RequestBody  AppUser user){
+//        userService.addNewUser(user);
+//    }
 
     @PostMapping("signup")
     public ResponseEntity<AppUser> createUser(@Valid @RequestBody AppUser user){
@@ -86,5 +86,7 @@ public class UserController {
                 .headers(responseHeaders)
                 .body(myMap);
     }
+
+
 
 }

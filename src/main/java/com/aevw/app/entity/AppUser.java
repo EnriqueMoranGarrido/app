@@ -8,10 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Past;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.net.http.HttpRequest;
 import java.time.LocalDate;
 import java.time.Period;
@@ -25,20 +22,26 @@ public class AppUser {
 
     @Id
     private String id;
+    @NotNull
     @NotBlank(message = "First name is mandatory")
     @Size(min = 2, message = "First name should have at least 2 characters")
+
     private String firstName;
+    @NotNull
     @NotBlank(message = "Last name is mandatory")
     @Size(min = 2, message = "Last name should have at least 2 characters")
     private String lastName;
 
+    @NotNull
     @Past(message = "Birthdate should be past")
     private LocalDate birthDate;
 
+    @NotNull
     @NotBlank(message = "Email is mandatory")
     @Email(message = "email should be a valid email format")
     @Column(name = "email", unique = true)
     private String email;
+    @NotNull
     @NotBlank(message = "Password is mandatory")
     @Size(min = 2, message = "Password should have at least 2 characters")
     private String password;
@@ -60,16 +63,22 @@ public class AppUser {
 
     private Boolean isActive = true;
 
+    @Transient
     private Integer loginCount;
 
+    @Transient
     private String ssoType;
 
+    @Transient
     private ZonedDateTime loginAt;
 
+    @Transient
     private ZonedDateTime createdAt;
 
+    @Transient
     private ZonedDateTime updatedAt;
 
+    @Transient
     private String userType;
 
     public AppUser() {

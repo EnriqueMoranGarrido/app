@@ -34,7 +34,7 @@ public class UserConfiguration {
 //            userService.saveUser(enrique);
 
             userService.saveUsers(List.of(enrique,ramon,martin,larysa,yulia));
-            System.out.println(enrique.getPassword());
+//            System.out.println(enrique.getPassword());
 //            userService.getUser("yulia@gmail.com");
         };
     }
