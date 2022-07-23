@@ -68,10 +68,6 @@ public class UserController {
     public ResponseEntity<APIResponse> signupUser(@Valid @RequestBody  AppUser user){
         APIResponse apiResponse = userService.signUpNewUser(user);
 
-        if(apiResponse.getError()!=null){
-            throw new ApiRequestException("Invalid data");
-        }
-
         return ResponseEntity
                 .status(apiResponse.getStatus())
                 .body(apiResponse);

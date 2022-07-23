@@ -135,6 +135,11 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
     public APIResponse signUpNewUser(AppUser userSignUpRequest) {
         APIResponse apiResponse = new APIResponse();
 
+        Optional<AppUser> userByEmail = userRepository.findAppUserByEmail(userSignUpRequest.getEmail());
+
+        if(userByEmail.isPresent()){
+            throw new ApiRequestException("Email already registered");
+        }
 
         AppUser userEntity = new AppUser();
 
