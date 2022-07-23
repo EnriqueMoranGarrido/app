@@ -1,5 +1,6 @@
 package com.aevw.app.service;
 
+import com.aevw.app.api.APIResponse;
 import com.aevw.app.entity.AppUser;
 import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.repository.UserRepository;
@@ -130,6 +131,28 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
         System.out.println("token no longer valid");
     }
 
+    @Override
+    public APIResponse signUpNewUser(AppUser userSignUpRequest) {
+        APIResponse apiResponse = new APIResponse();
+
+
+        AppUser userEntity = new AppUser();
+
+        userEntity.setFirstName(userSignUpRequest.getFirstName());
+        userEntity.setLastName(userSignUpRequest.getLastName());
+        userEntity.setBirthDate(userSignUpRequest.getBirthDate());
+        userEntity.setEmail(userSignUpRequest.getEmail());
+        userEntity.setPassword(userSignUpRequest.getPassword());
+        userEntity.setId(userSignUpRequest.getId());
+        userEntity.setActive(Boolean.TRUE);
+
+
+        userRepository.save(userEntity);
+
+        apiResponse.setData(userEntity);
+        apiResponse.setStatus(HttpStatus.CREATED);
+        return  apiResponse;
+    }
 
 
     @Override
@@ -137,7 +160,7 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         JSONObject root = new JSONObject(credentials);
         String email = (String) root.get("email");
-        String password = (String) root.get("password");;
+        String password = (String) root.get("password");
 
 
         AppUser myUser = userRepository.findByEmail(email);

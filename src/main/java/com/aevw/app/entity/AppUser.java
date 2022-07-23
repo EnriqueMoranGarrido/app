@@ -39,7 +39,7 @@ public class AppUser {
     @NotNull
     @NotBlank(message = "Email is mandatory")
     @Email(message = "email should be a valid email format")
-    @Column(name = "email", unique = true)
+    @Column( unique = true)
     private String email;
     @NotNull
     @NotBlank(message = "Password is mandatory")
@@ -179,4 +179,14 @@ public class AppUser {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         this.password = passwordEncoder.encode(password);
     }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
+    }
+
+
 }

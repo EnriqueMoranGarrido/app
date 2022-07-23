@@ -1,5 +1,6 @@
 package com.aevw.app.service;
 
+import com.aevw.app.api.APIResponse;
 import com.aevw.app.entity.AppUser;
 import org.json.JSONObject;
 import org.springframework.http.ResponseEntity;
@@ -21,4 +22,6 @@ public interface UserService {
     Map<String,String> tryingToLogInUser(String credentials);
 
     void logoutUser(Map<String,String> token);
+
+    APIResponse signUpNewUser(AppUser user);
 }

@@ -1,6 +1,7 @@
 package com.aevw.app.api;
 
 import com.aevw.app.entity.AppUser;
+import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.repository.UserRepository;
 import com.aevw.app.service.UserService;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -62,6 +63,19 @@ public class UserController {
 //        return new ResponseEntity<>(savedUser,HttpStatus.CREATED);
 //    }
 
+
+    @PostMapping("signup")
+    public ResponseEntity<APIResponse> signupUser(@Valid @RequestBody  AppUser user){
+        APIResponse apiResponse = userService.signUpNewUser(user);
+
+        if(apiResponse.getError()!=null){
+            throw new ApiRequestException("Invalid data");
+        }
+
+        return ResponseEntity
+                .status(apiResponse.getStatus())
+                .body(apiResponse);
+    }
 
     @PostMapping("login")
     public ResponseEntity<Map<String,String>> loginUser(@Valid @RequestBody String credentials){
