@@ -189,9 +189,10 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
                 Algorithm algorithm = Algorithm.HMAC256("secret");
                 String token = JWT.create()
                         .withIssuer(myUser.getEmail())
+                        .withExpiresAt(new Date(System.currentTimeMillis() + 50*60*1000))
                         .sign(algorithm);
 
-                Map<String, Object> jsonObject = new HashMap<String, Object>();
+                Map<String, Object> jsonObject = new HashMap<>();
                 jsonObject.put("id",myUser.getId());
                 jsonObject.put("email",myUser.getEmail());
                 jsonObject.put("token",token);
@@ -202,9 +203,11 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
                 userTokenRepository.save(myUserToken);
 
                 apiResponse.setData(jsonObject);
+
             } catch (JWTCreationException exception){
                 //Invalid Signing configuration / Couldn't convert Claims.
                 System.out.println("An error has ocurred");
+                throw new ApiRequestException("Invalid token, try again");
             }
 
         }else {
@@ -220,6 +223,10 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
 
         APIResponse apiResponse = new APIResponse();
         UserToken myUserToken = userTokenRepository.findByToken(token);
+
+        if(myUserToken ==null){
+            throw new ApiRequestException("Token not found, try again");
+        }
 
         try {
 

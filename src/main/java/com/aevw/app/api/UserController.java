@@ -60,7 +60,6 @@ public class UserController {
     }
 
 
-
     @PostMapping("/logOut")
     public ResponseEntity<APIResponse> privateApi(@RequestHeader (value = "Authorization", defaultValue = "") String auth){
 
