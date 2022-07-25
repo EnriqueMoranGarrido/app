@@ -1,5 +1,6 @@
 package com.aevw.app.api;
 
+import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 
 public class APIResponse {
@@ -31,6 +32,10 @@ public class APIResponse {
     }
 
     public void setData(Object data) {
+        this.data = data;
+    }
+
+    public void setDataJson(JSONObject data){
         this.data = data;
     }
 

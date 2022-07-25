@@ -2,14 +2,22 @@ package com.aevw.app.service;
 
 import com.aevw.app.api.APIResponse;
 import com.aevw.app.entity.AppUser;
+import com.aevw.app.entity.UserLogInRequest;
 import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.repository.UserRepository;
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.impl.JWTParser;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.JSONPObject;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.json.JSONParser;
 import org.json.JSONObject;
@@ -29,6 +37,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Writer;
+import java.time.LocalDate;
 import java.util.*;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -39,12 +48,6 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
     @Autowired
     private  UserRepository userRepository;
 
-    @Autowired
-    private HttpServletResponse servletResponse;
-
-//    public UserServiceImplementation(UserRepository userRepository) {
-//        this.userRepository = userRepository;
-//    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -58,7 +61,6 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
         }
 
 
-//        return new org.springframework.security.core.userdetails.User(user.getEmail(),user.getPassword());
         return null;
     }
 
@@ -141,14 +143,8 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
             throw new ApiRequestException("Email already registered");
         }
 
-        AppUser userEntity = new AppUser();
+        AppUser userEntity = userRepository.save(userSignUpRequest);
 
-        userEntity.setFirstName(userSignUpRequest.getFirstName());
-        userEntity.setLastName(userSignUpRequest.getLastName());
-        userEntity.setBirthDate(userSignUpRequest.getBirthDate());
-        userEntity.setEmail(userSignUpRequest.getEmail());
-        userEntity.setPassword(userSignUpRequest.getPassword());
-        userEntity.setId(userSignUpRequest.getId());
         userEntity.setActive(Boolean.TRUE);
 
 
@@ -159,72 +155,88 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
         return  apiResponse;
     }
 
-
     @Override
-    public Map<String,String> tryingToLogInUser(String credentials)  {
+    public APIResponse logInUser(UserLogInRequest credentials){
+
+        // Create API response
+
+        APIResponse apiResponse = new APIResponse();
+
+        // Create encoder
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+        // Read credentials information
         JSONObject root = new JSONObject(credentials);
         String email = (String) root.get("email");
         String password = (String) root.get("password");
 
+        // Validate user identity
 
         AppUser myUser = userRepository.findByEmail(email);
         if(myUser == null){
             throw new ApiRequestException("Invalid credentials");
         }
-
         if(passwordEncoder.matches(password,myUser.getPassword())){
-            System.out.println(myUser.getPassword());
-            log.info("User found {} with email {}", myUser.getFirstName(),myUser.getEmail() );
 
-            Algorithm algorithm = Algorithm.HMAC256("secret".getBytes());
+            // Generate JWT
 
-            String accessToken = JWT.create()
-                    .withJWTId(myUser.getId().concat(email) )
-                    .withSubject(myUser.getFirstName()+"_"+myUser.getLastName() + "_" + email)
-                    .withExpiresAt(new Date(System.currentTimeMillis() + 50*60*1000))
-                    .sign(algorithm);
+            try {
+                Algorithm algorithm = Algorithm.HMAC256("secret");
+                String token = JWT.create()
+                        .withIssuer("auth0")
+                        .sign(algorithm);
 
+                Map<String, Object> jsonObject = new HashMap<String, Object>();
+                jsonObject.put("id",myUser.getId());
+                jsonObject.put("email",myUser.getEmail());
+                jsonObject.put("token",token);
 
-            servletResponse.setHeader("acces_token",accessToken);
+                myUser.setToken(jsonObject);
 
-            root.put("access_token",accessToken);
+                apiResponse.setData(jsonObject);
+            } catch (JWTCreationException exception){
+                //Invalid Signing configuration / Couldn't convert Claims.
+                System.out.println("An error has ocurred");
+            }
 
-            Map<String,String> token = new HashMap<>();
+//            String accessToken = JWT.create()
+//                    .withJWTId(myUser.getId())
+//                    .withClaim("emailId",myUser.getEmail())
+//                    .withIssuer("auth0")
+//                    .withClaim("issuredAt",LocalDate.now().toString())
+//                    .withSubject(myUser.getFirstName()+"_"+myUser.getLastName() + "_" + email)
+//                    .withExpiresAt(new Date(System.currentTimeMillis() + 50*60*1000))
+//                    .sign(algorithm);
 
-            token.put("id", myUser.getId());
-            token.put("email", email);
-            token.put("token", " Bearer " + accessToken);
-
-
-
-//            userRepository.findByEmail(email).setToken(token);
-
-            System.out.println(root);
-
-            return token;
-
-//
-//
-//            servletResponse.setContentType(APPLICATION_JSON_VALUE);
-
-//            JSONObject myResponse = new JSONObject();
-//            myResponse.put("email",email);
-//            myResponse.put("password", password);
-//            myResponse.put("access_token", accessToken);
-//
-//            try {
-//                new ObjectMapper().writeValue(servletResponse.getOutputStream(),myResponse);
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-
-
-
-
+        }else {
+            apiResponse.setData("Credentials Invalid");
+            apiResponse.setStatus(HttpStatus.BAD_REQUEST);
         }
-        throw new ApiRequestException("Invalid credentials");
-
+        return apiResponse;
     }
 
+
+    public  APIResponse verifyToken(String token){
+        // Create API response
+
+        APIResponse apiResponse = new APIResponse();
+
+        try {
+
+            Algorithm algorithm = Algorithm.HMAC256("secret"); //use more secure key
+            JWTVerifier verifier = JWT.require(algorithm)
+                    .withIssuer("auth0")
+                    .build(); //Reusable verifier instance
+            DecodedJWT jwt = verifier.verify(token);
+
+        } catch (JWTVerificationException exception){
+            //Invalid signature/claims
+            System.out.println("An error has ocurred");
+            throw new ApiRequestException("Invalid token, try again!");
+        }
+
+        apiResponse.setData("Done, token was invalidated: " +  token);
+        return apiResponse;
+
+    }
 }

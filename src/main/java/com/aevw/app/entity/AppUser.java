@@ -49,17 +49,17 @@ public class AppUser {
     @Transient
     private Integer age;
 
-    public Map<String, String> getToken() {
+    public Object getToken() {
         return token;
     }
 
-    public void setToken(Map<String, String> token) {
+    public void setToken(Object token) {
         this.token = token;
     }
 
     @Transient
     @JsonFormat
-    private Map<String,String> token;
+    private Object token;
 
     private Boolean isActive = true;
 
