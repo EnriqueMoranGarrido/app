@@ -41,7 +41,7 @@ public class UserController {
         return ResponseEntity.ok().body(userService.getUsers());
     }
 
-    @PostMapping("signup")
+    @PostMapping("/signup")
     public ResponseEntity<APIResponse> signupUser(@Valid @RequestBody  AppUser user){
         APIResponse apiResponse = userService.signUpNewUser(user);
 
@@ -50,7 +50,7 @@ public class UserController {
                 .body(apiResponse);
     }
 
-    @PostMapping("logIn")
+    @PostMapping("/logIn")
     public ResponseEntity<APIResponse> logInUser(@Valid @RequestBody UserLogInRequest credentials){
         APIResponse apiResponse = userService.logInUser(credentials);
 
