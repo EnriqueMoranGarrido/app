@@ -49,42 +49,24 @@ public class AppUser {
     @Transient
     private Integer age;
 
-    public Object getToken() {
-        return token;
-    }
 
-    public void setToken(Object token) {
-        this.token = token;
-    }
 
-    @Transient
     @JsonFormat
-    private Object token;
+    private String token ="";
 
     private Boolean isActive = true;
 
-    @Transient
-    private Integer loginCount;
+    public String getToken() {
+        return token;
+    }
 
-    @Transient
-    private String ssoType;
-
-    @Transient
-    private ZonedDateTime loginAt;
-
-    @Transient
-    private ZonedDateTime createdAt;
-
-    @Transient
-    private ZonedDateTime updatedAt;
-
-    @Transient
-    private String userType;
+    public void setToken(String token) {
+        this.token = token;
+    }
 
     public AppUser() {
 
     }
-
 
 
     public AppUser(String id, String firstName, String lastName, LocalDate birthDate, String email, String password, Integer age) {

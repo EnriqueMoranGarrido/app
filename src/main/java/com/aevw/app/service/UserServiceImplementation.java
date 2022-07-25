@@ -3,8 +3,10 @@ package com.aevw.app.service;
 import com.aevw.app.api.APIResponse;
 import com.aevw.app.entity.AppUser;
 import com.aevw.app.entity.UserLogInRequest;
+import com.aevw.app.entity.UserToken;
 import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.repository.UserRepository;
+import com.aevw.app.repository.UserTokenRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -47,6 +49,9 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
 
     @Autowired
     private  UserRepository userRepository;
+
+    @Autowired
+    private  UserTokenRepository userTokenRepository;
 
 
     @Override
@@ -183,7 +188,7 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
             try {
                 Algorithm algorithm = Algorithm.HMAC256("secret");
                 String token = JWT.create()
-                        .withIssuer("auth0")
+                        .withIssuer(myUser.getEmail())
                         .sign(algorithm);
 
                 Map<String, Object> jsonObject = new HashMap<String, Object>();
@@ -191,22 +196,16 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
                 jsonObject.put("email",myUser.getEmail());
                 jsonObject.put("token",token);
 
-                myUser.setToken(jsonObject);
+                // Saving Token in user and token tables
+                myUser.setToken(token);
+                UserToken myUserToken = new UserToken(token,myUser.getEmail(),myUser.getId());
+                userTokenRepository.save(myUserToken);
 
                 apiResponse.setData(jsonObject);
             } catch (JWTCreationException exception){
                 //Invalid Signing configuration / Couldn't convert Claims.
                 System.out.println("An error has ocurred");
             }
-
-//            String accessToken = JWT.create()
-//                    .withJWTId(myUser.getId())
-//                    .withClaim("emailId",myUser.getEmail())
-//                    .withIssuer("auth0")
-//                    .withClaim("issuredAt",LocalDate.now().toString())
-//                    .withSubject(myUser.getFirstName()+"_"+myUser.getLastName() + "_" + email)
-//                    .withExpiresAt(new Date(System.currentTimeMillis() + 50*60*1000))
-//                    .sign(algorithm);
 
         }else {
             apiResponse.setData("Credentials Invalid");
@@ -220,14 +219,30 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
         // Create API response
 
         APIResponse apiResponse = new APIResponse();
+        UserToken myUserToken = userTokenRepository.findByToken(token);
 
         try {
 
             Algorithm algorithm = Algorithm.HMAC256("secret"); //use more secure key
             JWTVerifier verifier = JWT.require(algorithm)
-                    .withIssuer("auth0")
+                    .withIssuer(myUserToken.getUserEmail())
                     .build(); //Reusable verifier instance
             DecodedJWT jwt = verifier.verify(token);
+
+
+            AppUser myUserByToken = userRepository.findByEmail(myUserToken.getUserEmail());
+
+            if(myUserByToken.getToken().equals(myUserToken.getToken())) {
+                apiResponse.setData("Done, token was invalidated: " + myUserByToken.getToken());
+
+                // Reset the token attribute in user and token tables
+                myUserByToken.setToken("");
+                myUserToken.setToken("");
+
+            }else{
+                throw new ApiRequestException("Wrong token");
+            }
+
 
         } catch (JWTVerificationException exception){
             //Invalid signature/claims
@@ -235,7 +250,9 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
             throw new ApiRequestException("Invalid token, try again!");
         }
 
-        apiResponse.setData("Done, token was invalidated: " +  token);
+
+
+//        apiResponse.setData("Done, token was invalidated: " +  token);
         return apiResponse;
 
     }

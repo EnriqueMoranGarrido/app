@@ -60,30 +60,11 @@ public class UserController {
     }
 
 
-//    @PostMapping("logout")
-//    public ResponseEntity<Map<String,String>> usingResponseEntityBuilderAndHttpHeaders() {
-//        HttpHeaders responseHeaders = new HttpHeaders();
-//        responseHeaders.set("Baeldung-Example-Header",
-//                "Value-ResponseEntityBuilderWithHttpHeaders");
-//
-//        Map<String, String> myMap = new HashMap<>();
-//
-//        myMap.put("Authentication","Beaver xxxx");
-//
-//        return ResponseEntity.ok()
-//                .headers(responseHeaders)
-//                .body(myMap);
-//    }
-
 
     @PostMapping("/logOut")
     public ResponseEntity<APIResponse> privateApi(@RequestHeader (value = "Authorization", defaultValue = "") String auth){
-//        APIResponse apiResponse = new APIResponse();
 
         APIResponse apiResponse = userService.verifyToken(auth);
-
-//        apiResponse.setData("User logged out");
-//        System.out.println("token: " + apiResponse.getData());
 
         return ResponseEntity
                 .status(apiResponse.getStatus())

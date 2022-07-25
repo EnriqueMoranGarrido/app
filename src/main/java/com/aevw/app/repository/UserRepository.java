@@ -1,6 +1,7 @@
 package com.aevw.app.repository;
 
 import com.aevw.app.entity.AppUser;
+import com.aevw.app.entity.UserToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +15,5 @@ public interface UserRepository extends JpaRepository<AppUser,String> {
     Optional<AppUser> findAppUserByEmail(String email);
 
     AppUser findByEmailAndPassword(String email, String password);
+
 }
