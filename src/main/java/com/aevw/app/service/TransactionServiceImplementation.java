@@ -2,11 +2,12 @@ package com.aevw.app.service;
 
 import com.aevw.app.api.APIResponse;
 import com.aevw.app.entity.AppUser;
-import com.aevw.app.entity.TransactionActions;
 import com.aevw.app.entity.UserToken;
+import com.aevw.app.entity.UserTransaction;
 import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.repository.UserRepository;
 import com.aevw.app.repository.UserTokenRepository;
+import com.aevw.app.repository.UserTransactionRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 @Service
@@ -24,11 +26,11 @@ import java.util.ArrayList;
 @Slf4j
 public class TransactionServiceImplementation implements TransactionService{
 
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private UserRepository userRepository;
+    @Autowired private UserTokenRepository userTokenRepository;
 
-    @Autowired
-    private UserTokenRepository userTokenRepository;
+    @Autowired private UserTransactionRepository userTransactionRepository;
+
 
     private ArrayList<Object> verifyToken(String token){
 
@@ -59,46 +61,85 @@ public class TransactionServiceImplementation implements TransactionService{
         }
     }
 
+    //////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////        FILL         ////////////////////////////////////
     @Override
     public APIResponse fill(String token, Double value) {
 
+        // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
+        // Create ArrayList to get token verification and user
         ArrayList<Object> verifyTokenAndGetUser = verifyToken(token);
 
+        // If the token is valid:
         if(verifyTokenAndGetUser.get(1).equals(true)){
+
+            // Create new user with user received for clearer variable use
             AppUser myUserToFill = (AppUser) verifyTokenAndGetUser.get(0);
+
+            // Set the capital of the user
             myUserToFill.setCapital(myUserToFill.getCapital()+value);
 
+            UserTransaction transaction = new UserTransaction(token,
+                                                myUserToFill.getEmail(),
+                                                value,
+                                                LocalDateTime.now().toString(),
+                                                "payment_fill");
+
+            userTransactionRepository.save(transaction);
+
+            // Set the api response data
             apiResponse.setData(value + " were added to " + myUserToFill.getEmail()
                                                       + " . Total capital: " + myUserToFill.getCapital());
+            // return the api response
             return apiResponse;
         }
+
+        // throw API request exception
         throw new ApiRequestException("Could not fulfill transaction");
     }
 
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////        WITHDRAW         //////////////////////////////////
     @Override
     public APIResponse withdraw(String token, Double value) {
 
+        // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
+        // Create ArrayList to get token verification and user
         ArrayList<Object> verifyTokenAndGetUser = verifyToken(token);
 
+        // If the token is valid:
         if(verifyTokenAndGetUser.get(1).equals(true)){
+
+            // Create new user with user received for clearer variable use
             AppUser myUserToWithdraw = (AppUser) verifyTokenAndGetUser.get(0);
 
+            // If the user's capital is greater than the withdrawal requested:
             if(myUserToWithdraw.getCapital() > value){
+
+                // Set the capital of the user
                 myUserToWithdraw.setCapital(myUserToWithdraw.getCapital()-value);
 
+                // Set the api response data
                 apiResponse.setData(value + " were withdrawn to " + myUserToWithdraw.getEmail()
                         + " . Total capital: " + myUserToWithdraw.getCapital());
 
+                // return the api response
                 return apiResponse;
             }
         }
+
+        // throw API request exception
         throw new ApiRequestException("Could not fulfill transaction");
     }
 
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////        PAY         ////////////////////////////////////
     @Override
     public APIResponse pay(String token, Double value, String email) {
 

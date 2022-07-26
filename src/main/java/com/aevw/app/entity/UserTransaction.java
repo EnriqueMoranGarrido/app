@@ -16,18 +16,21 @@ public class UserTransaction {
 
     private Double money = 0.0;
 
-    @Transient
-    private HashMap<String,String> transactions;
+    private String dateTime;
+
+    private String type;
+
 
 
     public UserTransaction() {
     }
 
-    public UserTransaction(String token, String email, Double money, HashMap<String,String> transactions) {
+    public UserTransaction(String token, String email, Double money, String dateTime, String type) {
         this.token = token;
         this.email = email;
         this.money = money;
-        this.transactions = transactions;
+        this.dateTime = dateTime;
+        this.type = type;
     }
 
     public String getEmail() {
@@ -46,13 +49,6 @@ public class UserTransaction {
         this.money = money;
     }
 
-    public HashMap<String,String> getTransactions() {
-        return transactions;
-    }
-
-    public void setTransactions(HashMap<String,String> transactions) {
-        this.transactions = transactions;
-    }
 
     public String getToken() {
         return token;

@@ -13,6 +13,7 @@ import java.net.http.HttpRequest;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -55,6 +56,9 @@ public class AppUser {
     private String token ="";
 
     private Boolean isActive = true;
+
+    @Transient
+    private HashMap<String,Object> transactions;
 
     public String getToken() {
         return token;
@@ -176,5 +180,13 @@ public class AppUser {
 
     public void setCapital(Double capital) {
         this.capital = capital;
+    }
+
+    public HashMap<String, Object> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(HashMap<String, Object> transactions) {
+        this.transactions = transactions;
     }
 }
