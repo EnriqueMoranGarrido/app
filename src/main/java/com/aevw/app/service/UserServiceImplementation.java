@@ -213,13 +213,11 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
         }
 
         try {
-
             Algorithm algorithm = Algorithm.HMAC256("secret"); //use more secure key
             JWTVerifier verifier = JWT.require(algorithm)
                     .withIssuer(myUserToken.getUserEmail())
                     .build(); //Reusable verifier instance
             DecodedJWT jwt = verifier.verify(token);
-
 
             AppUser myUserByToken = userRepository.findByEmail(myUserToken.getUserEmail());
 
@@ -233,15 +231,11 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
             }else{
                 throw new ApiRequestException("Wrong token");
             }
-
-
         } catch (JWTVerificationException exception){
             //Invalid signature/claims
             System.out.println("An error has ocurred");
             throw new ApiRequestException("Invalid token, try again!");
         }
-
-
 
 //        apiResponse.setData("Done, token was invalidated: " +  token);
         return apiResponse;

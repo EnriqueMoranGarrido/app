@@ -2,6 +2,7 @@ package com.aevw.app.service;
 
 import com.aevw.app.api.APIResponse;
 import com.aevw.app.entity.AppUser;
+import com.aevw.app.entity.TransactionActions;
 import com.aevw.app.entity.UserToken;
 import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.repository.UserRepository;
@@ -12,9 +13,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,7 +84,6 @@ public class TransactionServiceImplementation implements TransactionService{
 
         ArrayList<Object> verifyTokenAndGetUser = verifyToken(token);
 
-
         if(verifyTokenAndGetUser.get(1).equals(true)){
             AppUser myUserToWithdraw = (AppUser) verifyTokenAndGetUser.get(0);
 
@@ -94,23 +92,46 @@ public class TransactionServiceImplementation implements TransactionService{
 
                 apiResponse.setData(value + " were withdrawn to " + myUserToWithdraw.getEmail()
                         + " . Total capital: " + myUserToWithdraw.getCapital());
+
+                return apiResponse;
             }
         }
+        throw new ApiRequestException("Could not fulfill transaction");
+    }
 
-        apiResponse.setData("Could not fulfill transaction");
-        apiResponse.setStatus(HttpStatus.BAD_REQUEST);
+    @Override
+    public APIResponse pay(String token, Double value, String email) {
+
+        APIResponse apiResponse = new APIResponse();
+
+        ArrayList<Object> verifyTokenAndGetUser = verifyToken(token);
+
+        if(verifyTokenAndGetUser.get(1).equals(true)){
+            AppUser myUserToPay = (AppUser) verifyTokenAndGetUser.get(0);
+
+            if(myUserToPay.getCapital() > value){
+
+                AppUser myUserByEmail = userRepository.findByEmail(email);
+
+                myUserToPay.setCapital(myUserToPay.getCapital()-value);
+                myUserByEmail.setCapital(myUserByEmail.getCapital()+value);
+
+                apiResponse.setData(value + " were paid from " + myUserToPay.getEmail()
+                        + " to " + myUserByEmail.getEmail()+ ". Total capital: " + myUserToPay.getCapital());
+
+                return apiResponse;
+            }
+        }
+        throw new ApiRequestException("Could not fulfill transaction");
+    }
+
+    @Override
+    public APIResponse getTransactions(String token, String start_date, String end_date) {
+
+        APIResponse apiResponse = new APIResponse();
+
+        apiResponse.setData("Hello, Chencho!");
 
         return apiResponse;
-    }
-
-    @Override
-    public APIResponse pay() {
-        return null;
-    }
-
-    @Override
-    public void getTransactions() {
-
-
     }
 }

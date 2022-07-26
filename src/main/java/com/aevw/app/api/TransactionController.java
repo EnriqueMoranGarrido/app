@@ -14,7 +14,6 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
-
     public TransactionController(TransactionService transactionService) {
         this.transactionService = transactionService;
     }
@@ -24,8 +23,6 @@ public class TransactionController {
                                                        @RequestBody TransactionActions transactionActions){
 
         APIResponse apiResponse = transactionService.fill(auth,transactionActions.getValue().doubleValue());
-
-
 
         return ResponseEntity
                 .status(apiResponse.getStatus())
@@ -46,18 +43,14 @@ public class TransactionController {
     @PostMapping("/pay")
     public ResponseEntity<APIResponse> payTransaction(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
                                                       @RequestBody TransactionActions transactionActions){
-        APIResponse apiResponse = new APIResponse();
 
-        System.out.println(auth);
-        System.out.println(transactionActions.getValue().doubleValue());
-        System.out.println(transactionActions.getEmail());
-
-
+        APIResponse apiResponse = transactionService.pay(auth,
+                                                        transactionActions.getValue().doubleValue(),
+                                                        transactionActions.getEmail());
 
         return ResponseEntity
                 .status(apiResponse.getStatus())
                 .body(apiResponse);
     }
-
 
 }

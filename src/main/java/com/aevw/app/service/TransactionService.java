@@ -8,7 +8,7 @@ public interface TransactionService {
 
     APIResponse withdraw(String token, Double value);
 
-    APIResponse pay();
+    APIResponse pay(String token, Double value, String email);
 
-    void getTransactions();
+    APIResponse getTransactions(String token, String start_date, String end_date);
 }
