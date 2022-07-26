@@ -14,6 +14,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +35,8 @@ public class TransactionServiceImplementation implements TransactionService{
 
         UserToken myUserToken = userTokenRepository.findByToken(token);
 
+        ArrayList<Object> myReturnArray = new ArrayList<>();
+
         if(myUserToken ==null){
             throw new ApiRequestException("Token not found, try again");
         }
@@ -46,7 +49,6 @@ public class TransactionServiceImplementation implements TransactionService{
 
             AppUser myUserByToken = userRepository.findByEmail(myUserToken.getUserEmail());
 
-            ArrayList<Object> myReturnArray = new ArrayList<>();
             myReturnArray.add(myUserByToken);
             myReturnArray.add(myUserByToken.getToken().equals(myUserToken.getToken()));
 
@@ -54,10 +56,9 @@ public class TransactionServiceImplementation implements TransactionService{
 
         } catch (JWTVerificationException exception){
             //Invalid signature/claims
-            return null;
+            return myReturnArray;
         }
     }
-
 
     @Override
     public APIResponse fill(String token, Double value) {
@@ -70,14 +71,11 @@ public class TransactionServiceImplementation implements TransactionService{
             AppUser myUserToFill = (AppUser) verifyTokenAndGetUser.get(0);
             myUserToFill.setCapital(myUserToFill.getCapital()+value);
 
-            apiResponse.setData(String.valueOf(value) + " were added to " + myUserToFill.getEmail()
+            apiResponse.setData(value + " were added to " + myUserToFill.getEmail()
                                                       + " . Total capital: " + myUserToFill.getCapital());
-
-        }else{
-            apiResponse.setData("Could not fulfill transaction");
+            return apiResponse;
         }
-
-        return apiResponse;
+        throw new ApiRequestException("Could not fulfill transaction");
     }
 
     @Override
@@ -85,8 +83,22 @@ public class TransactionServiceImplementation implements TransactionService{
 
         APIResponse apiResponse = new APIResponse();
 
+        ArrayList<Object> verifyTokenAndGetUser = verifyToken(token);
 
 
+        if(verifyTokenAndGetUser.get(1).equals(true)){
+            AppUser myUserToWithdraw = (AppUser) verifyTokenAndGetUser.get(0);
+
+            if(myUserToWithdraw.getCapital() > value){
+                myUserToWithdraw.setCapital(myUserToWithdraw.getCapital()-value);
+
+                apiResponse.setData(value + " were withdrawn to " + myUserToWithdraw.getEmail()
+                        + " . Total capital: " + myUserToWithdraw.getCapital());
+            }
+        }
+
+        apiResponse.setData("Could not fulfill transaction");
+        apiResponse.setStatus(HttpStatus.BAD_REQUEST);
 
         return apiResponse;
     }

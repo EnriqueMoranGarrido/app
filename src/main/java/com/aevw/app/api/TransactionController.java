@@ -25,9 +25,6 @@ public class TransactionController {
 
         APIResponse apiResponse = transactionService.fill(auth,transactionActions.getValue().doubleValue());
 
-//        System.out.println(auth);
-//        System.out.println(transactionActions.getValue().doubleValue());
-
 
 
         return ResponseEntity
@@ -38,11 +35,8 @@ public class TransactionController {
     @PostMapping("/withdraw")
     public ResponseEntity<APIResponse> withdrawTransaction(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
                                                            @RequestBody TransactionActions transactionActions){
-        APIResponse apiResponse = new APIResponse();
 
-
-        System.out.println(auth);
-        System.out.println(transactionActions.getValue().doubleValue());
+        APIResponse apiResponse = transactionService.withdraw(auth,transactionActions.getValue().doubleValue());
 
         return ResponseEntity
                 .status(apiResponse.getStatus())
