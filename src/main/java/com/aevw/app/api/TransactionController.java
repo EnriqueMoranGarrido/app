@@ -22,11 +22,13 @@ public class TransactionController {
     @PostMapping("/fill")
     public ResponseEntity<APIResponse> fillTransaction(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
                                                        @RequestBody TransactionActions transactionActions){
-        APIResponse apiResponse = new APIResponse();
 
+        APIResponse apiResponse = transactionService.fill(auth,transactionActions.getValue().intValue());
 
         System.out.println(auth);
         System.out.println(transactionActions.getValue().doubleValue());
+
+
 
         return ResponseEntity
                 .status(apiResponse.getStatus())
