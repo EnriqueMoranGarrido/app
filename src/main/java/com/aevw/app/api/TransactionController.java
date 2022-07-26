@@ -23,10 +23,10 @@ public class TransactionController {
     public ResponseEntity<APIResponse> fillTransaction(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
                                                        @RequestBody TransactionActions transactionActions){
 
-        APIResponse apiResponse = transactionService.fill(auth,transactionActions.getValue().intValue());
+        APIResponse apiResponse = transactionService.fill(auth,transactionActions.getValue().doubleValue());
 
-        System.out.println(auth);
-        System.out.println(transactionActions.getValue().doubleValue());
+//        System.out.println(auth);
+//        System.out.println(transactionActions.getValue().doubleValue());
 
 
 

@@ -4,9 +4,9 @@ import com.aevw.app.api.APIResponse;
 
 public interface TransactionService {
 
-    APIResponse fill(String token, Integer value);
+    APIResponse fill(String token, Double value);
 
-    APIResponse withdraw();
+    APIResponse withdraw(String token, Double value);
 
     APIResponse pay();
 

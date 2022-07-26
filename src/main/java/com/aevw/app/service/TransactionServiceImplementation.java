@@ -12,9 +12,12 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 
 @Service
 @Transactional
@@ -27,7 +30,7 @@ public class TransactionServiceImplementation implements TransactionService{
     @Autowired
     private UserTokenRepository userTokenRepository;
 
-    private boolean verifyToken(String token){
+    private ArrayList<Object> verifyToken(String token){
 
         UserToken myUserToken = userTokenRepository.findByToken(token);
 
@@ -35,7 +38,6 @@ public class TransactionServiceImplementation implements TransactionService{
             throw new ApiRequestException("Token not found, try again");
         }
         try {
-
             Algorithm algorithm = Algorithm.HMAC256("secret"); //use more secure key
             JWTVerifier verifier = JWT.require(algorithm)
                     .withIssuer(myUserToken.getUserEmail())
@@ -44,42 +46,49 @@ public class TransactionServiceImplementation implements TransactionService{
 
             AppUser myUserByToken = userRepository.findByEmail(myUserToken.getUserEmail());
 
-            if(myUserByToken.getToken().equals(myUserToken.getToken())) {
+            ArrayList<Object> myReturnArray = new ArrayList<>();
+            myReturnArray.add(myUserByToken);
+            myReturnArray.add(myUserByToken.getToken().equals(myUserToken.getToken()));
 
-                return true;
-            }else{
-                return false;
-            }
+            return myReturnArray;
 
         } catch (JWTVerificationException exception){
             //Invalid signature/claims
-            return false;
+            return null;
         }
     }
 
 
     @Override
-    public APIResponse fill(String token, Integer value) {
+    public APIResponse fill(String token, Double value) {
 
         APIResponse apiResponse = new APIResponse();
 
-        if(verifyToken(token)){
-            log.info("valid token: {}",token);
-        }else {
-            log.info("invalid token: {}",token);
+        ArrayList<Object> verifyTokenAndGetUser = verifyToken(token);
+
+        if(verifyTokenAndGetUser.get(1).equals(true)){
+            AppUser myUserToFill = (AppUser) verifyTokenAndGetUser.get(0);
+            myUserToFill.setCapital(myUserToFill.getCapital()+value);
+
+            apiResponse.setData(String.valueOf(value) + " were added to " + myUserToFill.getEmail()
+                                                      + " . Total capital: " + myUserToFill.getCapital());
+
+        }else{
+            apiResponse.setData("Could not fulfill transaction");
         }
-
-
 
         return apiResponse;
     }
 
     @Override
-    public APIResponse withdraw() {
+    public APIResponse withdraw(String token, Double value) {
+
+        APIResponse apiResponse = new APIResponse();
 
 
 
-        return null;
+
+        return apiResponse;
     }
 
     @Override

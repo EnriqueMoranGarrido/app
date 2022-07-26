@@ -49,7 +49,7 @@ public class AppUser {
     @Transient
     private Integer age;
 
-
+    private Double capital = 0.0;
 
     @JsonFormat
     private String token ="";
@@ -170,5 +170,11 @@ public class AppUser {
         isActive = active;
     }
 
+    public Double getCapital() {
+        return capital;
+    }
 
+    public void setCapital(Double capital) {
+        this.capital = capital;
+    }
 }
