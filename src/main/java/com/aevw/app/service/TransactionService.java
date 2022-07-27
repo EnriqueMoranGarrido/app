@@ -1,6 +1,7 @@
 package com.aevw.app.service;
 
 import com.aevw.app.api.APIResponse;
+import com.aevw.app.api.TransactionsSumaryResponse;
 
 public interface TransactionService {
 
@@ -10,5 +11,5 @@ public interface TransactionService {
 
     APIResponse pay(String token, Double value, String email);
 
-    APIResponse getTransactions(String token, String start_date, String end_date);
+    TransactionsSumaryResponse getTransactions(String token, String start_date, String end_date);
 }

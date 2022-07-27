@@ -1,7 +1,9 @@
 package com.aevw.app.service;
 
 import com.aevw.app.api.APIResponse;
+import com.aevw.app.api.TransactionsSumaryResponse;
 import com.aevw.app.entity.AppUser;
+import com.aevw.app.entity.TransactionsDTO;
 import com.aevw.app.entity.UserToken;
 import com.aevw.app.entity.UserTransaction;
 import com.aevw.app.exception.ApiRequestException;
@@ -15,11 +17,9 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,24 +85,26 @@ public class TransactionServiceImplementation implements TransactionService{
 
     private ArrayList<Integer> getDates(String start_date, String end_date){
 
+        // Try converting the Strings into Integers
         try{
 
-        //
+        // Creating variables start and end from incoming data
         String[] start = start_date.split("-");
         String[] end = end_date.split("-");
 
-
+        // Getting the value of the strings as integers
         int start_year = Integer.parseInt(start[0]);
         int start_month = Integer.parseInt(start[1]);
         int start_day = Integer.parseInt(start[2]);
-
 
         int end_year = Integer.parseInt(end[0]);
         int end_month = Integer.parseInt(end[1]);
         int end_day = Integer.parseInt(end[2]);
 
+        // Creating an array to return the values
         ArrayList<Integer> returningArray = new ArrayList<>();
 
+        // Filling the array with the values obtained from the parsed
         returningArray.add(start_year);
         returningArray.add(start_month);
         returningArray.add(start_day);
@@ -110,12 +112,11 @@ public class TransactionServiceImplementation implements TransactionService{
         returningArray.add(end_month);
         returningArray.add(end_day);
 
-        System.out.println(returningArray.get(5));
-        System.out.println(returningArray.get(2));
-
+        // return the array
         return returningArray;
         }
         catch (Exception e){
+            // Throw exception
             throw  new ApiRequestException("Invalid data, try again!");
         }
     }
@@ -245,26 +246,44 @@ public class TransactionServiceImplementation implements TransactionService{
     }
 
     @Override
-    public APIResponse getTransactions(String token, String start_date, String end_date) {
+    public TransactionsSumaryResponse getTransactions(String token, String start_date, String end_date) {
 
+        // Transform the start and end dates from Strings to Integers
         ArrayList<Integer> dates = getDates(start_date,end_date);
 
-        APIResponse apiResponse = new APIResponse();
+        // Create new API Response
+        TransactionsSumaryResponse transactionResponse = new TransactionsSumaryResponse();
 
+        // Create ArrayList to get token verification and user
         ArrayList<Object> verifyTokenAndGetUser = verifyToken(token);
 
+        // If the token is valid:
         if(verifyTokenAndGetUser.get(1).equals(true)) {
 
+            // Create new user with user received for clearer variable use
             AppUser myUserToPay = (AppUser) verifyTokenAndGetUser.get(0);
 
-
+            // Get the transactions between the provided dates for this user
             List<UserTransaction> transactions = userTransactionRepository.findAllByDateTimeBetweenAndEmail(
                     LocalDateTime.of(dates.get(0),dates.get(1),dates.get(2),0,0,0) .toString(),
                     LocalDateTime.of(dates.get(3),dates.get(4),dates.get(5),23,59,59) .toString(),
                     myUserToPay.getEmail());
 
-            apiResponse.setData(transactions);
+            ArrayList<TransactionsDTO> myResponseTransactions = new ArrayList<>();
+
+            for (UserTransaction transaction: transactions
+                 ) {
+                TransactionsDTO transactionsDTO = new TransactionsDTO(
+                        transaction.getDateTime(),
+                        transaction.getType(),
+                        transaction.getMoney()
+                );
+                myResponseTransactions.add(transactionsDTO);
+            }
+
+            // Set the api response
+            transactionResponse.setTransactions(myResponseTransactions);
         }
-        return apiResponse;
+        return transactionResponse;
     }
 }

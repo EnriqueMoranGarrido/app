@@ -1,16 +1,18 @@
 package com.aevw.app.entity;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 
 public class TransactionActions {
     @NotNull
     @NotBlank(message = "Value is mandatory")
     private Integer value;
 
+
     private String email;
 
+
     private String start_date;
+
 
     private String end_date;
 
