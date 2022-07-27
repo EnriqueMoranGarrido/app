@@ -10,6 +10,10 @@ public class TransactionActions {
 
     private String email;
 
+    private String start_date;
+
+    private String end_date;
+
     public TransactionActions() {
     }
 
@@ -26,6 +30,11 @@ public class TransactionActions {
         this.email = email;
     }
 
+    public TransactionActions(String start_date, String end_date) {
+        this.start_date = start_date;
+        this.end_date = end_date;
+    }
+
     public Integer getValue() {
         return value;
     }
@@ -40,5 +49,21 @@ public class TransactionActions {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getStart_date() {
+        return start_date;
+    }
+
+    public void setStart_date(String start_date) {
+        this.start_date = start_date;
+    }
+
+    public String getEnd_date() {
+        return end_date;
+    }
+
+    public void setEnd_date(String end_date) {
+        this.end_date = end_date;
     }
 }

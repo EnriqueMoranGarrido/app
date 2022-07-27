@@ -53,4 +53,17 @@ public class TransactionController {
                 .body(apiResponse);
     }
 
+    @GetMapping("/summary")
+    public ResponseEntity<APIResponse> getTransactions(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
+                                                       @RequestBody TransactionActions transactionActions){
+
+        APIResponse apiResponse = transactionService.getTransactions(auth,
+                transactionActions.getStart_date(),
+                transactionActions.getEnd_date());
+
+        return ResponseEntity
+                .status(apiResponse.getStatus())
+                .body(apiResponse);
+    }
+
 }

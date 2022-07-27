@@ -15,11 +15,14 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Transactional
@@ -81,7 +84,7 @@ public class TransactionServiceImplementation implements TransactionService{
             // Set the capital of the user
             myUserToFill.setCapital(myUserToFill.getCapital()+value);
 
-            UserTransaction transaction = new UserTransaction(token,
+            UserTransaction transaction = new UserTransaction(
                                                 myUserToFill.getEmail(),
                                                 value,
                                                 LocalDateTime.now().toString(),
@@ -124,6 +127,14 @@ public class TransactionServiceImplementation implements TransactionService{
                 // Set the capital of the user
                 myUserToWithdraw.setCapital(myUserToWithdraw.getCapital()-value);
 
+                UserTransaction transaction = new UserTransaction(
+                        myUserToWithdraw.getEmail(),
+                        value,
+                        LocalDateTime.now().toString(),
+                        "payment_withdraw");
+
+                userTransactionRepository.save(transaction);
+
                 // Set the api response data
                 apiResponse.setData(value + " were withdrawn to " + myUserToWithdraw.getEmail()
                         + " . Total capital: " + myUserToWithdraw.getCapital());
@@ -154,13 +165,34 @@ public class TransactionServiceImplementation implements TransactionService{
 
                 AppUser myUserByEmail = userRepository.findByEmail(email);
 
-                myUserToPay.setCapital(myUserToPay.getCapital()-value);
-                myUserByEmail.setCapital(myUserByEmail.getCapital()+value);
+                if(myUserByEmail != null){
 
-                apiResponse.setData(value + " were paid from " + myUserToPay.getEmail()
-                        + " to " + myUserByEmail.getEmail()+ ". Total capital: " + myUserToPay.getCapital());
+                    myUserToPay.setCapital(myUserToPay.getCapital()-value);
 
-                return apiResponse;
+                    UserTransaction transactionFrom = new UserTransaction(
+                            myUserToPay.getEmail(),
+                            value,
+                            LocalDateTime.now().toString(),
+                            "payment_made");
+
+                    userTransactionRepository.save(transactionFrom);
+
+                    myUserByEmail.setCapital(myUserByEmail.getCapital()+value);
+
+                    UserTransaction transactionTo = new UserTransaction(
+                            myUserByEmail.getEmail(),
+                            value,
+                            LocalDateTime.now().toString(),
+                            "payment_received");
+
+                    userTransactionRepository.save(transactionTo);
+
+                    apiResponse.setData(value + " were paid from " + myUserToPay.getEmail()
+                            + " to " + myUserByEmail.getEmail()+ ". Total capital: " + myUserToPay.getCapital());
+
+                    return apiResponse;
+                }
+
             }
         }
         throw new ApiRequestException("Could not fulfill transaction");
@@ -169,9 +201,43 @@ public class TransactionServiceImplementation implements TransactionService{
     @Override
     public APIResponse getTransactions(String token, String start_date, String end_date) {
 
+
+        String[] start = start_date.split("-");
+
+        String[] end = end_date.split("-");
+
+
+        int start_year = Integer.parseInt(start[0]);
+
+        int start_month = Integer.parseInt(start[1]);
+
+        int start_day = Integer.parseInt(start[2]);
+
+
+        int end_year = Integer.parseInt(end[0]);
+
+        int end_month = Integer.parseInt(end[1]);
+
+        int end_day = Integer.parseInt(end[2]);
+
+
+
         APIResponse apiResponse = new APIResponse();
 
-        apiResponse.setData("Hello, Chencho!");
+        ArrayList<Object> verifyTokenAndGetUser = verifyToken(token);
+
+        if(verifyTokenAndGetUser.get(1).equals(true)) {
+
+            AppUser myUserToPay = (AppUser) verifyTokenAndGetUser.get(0);
+
+            List<UserTransaction> transactions = userTransactionRepository.findAllByDateTimeBetweenAndEmail(
+                    LocalDateTime.of(start_year,start_month,start_day,0,0,0) .toString(),
+                    LocalDateTime.of(end_year,end_month,end_day,23,59,59) .toString(),
+                    myUserToPay.getEmail());
+
+            apiResponse.setData(transactions);
+
+        }
 
         return apiResponse;
     }

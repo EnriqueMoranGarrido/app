@@ -1,22 +1,22 @@
 package com.aevw.app.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.util.HashMap;
 
 @Entity
 public class UserTransaction {
+
+//    @GeneratedValue(strategy = GenerationType.AUTO)
+
     @Id
-    @Column(name = "token", nullable = false)
-    private String token;
+    @Column(name = "date_time", nullable = false)
+    private String dateTime;
+
+//    @Column(name = "token", nullable = false)
 
     private String email;
 
     private Double money = 0.0;
-
-    private String dateTime;
 
     private String type;
 
@@ -25,11 +25,10 @@ public class UserTransaction {
     public UserTransaction() {
     }
 
-    public UserTransaction(String token, String email, Double money, String dateTime, String type) {
-        this.token = token;
+    public UserTransaction( String email, Double money, String dateTime, String type) {
+        this.dateTime = dateTime;
         this.email = email;
         this.money = money;
-        this.dateTime = dateTime;
         this.type = type;
     }
 
@@ -50,11 +49,20 @@ public class UserTransaction {
     }
 
 
-    public String getToken() {
-        return token;
+
+    public String getDateTime() {
+        return dateTime;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setDateTime(String dateTime) {
+        this.dateTime = dateTime;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
