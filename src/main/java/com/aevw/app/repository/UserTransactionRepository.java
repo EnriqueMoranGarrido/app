@@ -9,5 +9,4 @@ public interface UserTransactionRepository extends JpaRepository<UserTransaction
 
     List<UserTransaction> findAllByDateTimeBetweenAndEmail(String start_date, String end_date, String email);
 
-    List<UserTransaction> findByEmail(String email);
 }

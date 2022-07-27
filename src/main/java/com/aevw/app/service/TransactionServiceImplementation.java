@@ -31,10 +31,11 @@ public class TransactionServiceImplementation implements TransactionService{
 
     @Autowired private UserRepository userRepository;
     @Autowired private UserTokenRepository userTokenRepository;
-
     @Autowired private UserTransactionRepository userTransactionRepository;
 
 
+    //////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////        VERIFY TOKEN         ///////////////////////////////
     private ArrayList<Object> verifyToken(String token){
 
         UserToken myUserToken = userTokenRepository.findByToken(token);
@@ -65,6 +66,62 @@ public class TransactionServiceImplementation implements TransactionService{
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////        CREATE TRANSACTION         ////////////////////////////
+
+    private void createTransaction(String email, Double value, String type){
+        try{
+            UserTransaction transaction = new UserTransaction(
+                email,
+                value,
+                LocalDateTime.now().toString(),
+                type);
+
+            userTransactionRepository.save(transaction);
+
+        }catch(Exception e){
+            throw new ApiRequestException("Invalid data, try again");
+        }
+    }
+
+    private ArrayList<Integer> getDates(String start_date, String end_date){
+
+        try{
+
+        //
+        String[] start = start_date.split("-");
+        String[] end = end_date.split("-");
+
+
+        int start_year = Integer.parseInt(start[0]);
+        int start_month = Integer.parseInt(start[1]);
+        int start_day = Integer.parseInt(start[2]);
+
+
+        int end_year = Integer.parseInt(end[0]);
+        int end_month = Integer.parseInt(end[1]);
+        int end_day = Integer.parseInt(end[2]);
+
+        ArrayList<Integer> returningArray = new ArrayList<>();
+
+        returningArray.add(start_year);
+        returningArray.add(start_month);
+        returningArray.add(start_day);
+        returningArray.add(end_year);
+        returningArray.add(end_month);
+        returningArray.add(end_day);
+
+        System.out.println(returningArray.get(5));
+        System.out.println(returningArray.get(2));
+
+        return returningArray;
+        }
+        catch (Exception e){
+            throw  new ApiRequestException("Invalid data, try again!");
+        }
+    }
+
+
+    //////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////        FILL         ////////////////////////////////////
     @Override
     public APIResponse fill(String token, Double value) {
@@ -84,13 +141,7 @@ public class TransactionServiceImplementation implements TransactionService{
             // Set the capital of the user
             myUserToFill.setCapital(myUserToFill.getCapital()+value);
 
-            UserTransaction transaction = new UserTransaction(
-                                                myUserToFill.getEmail(),
-                                                value,
-                                                LocalDateTime.now().toString(),
-                                                "payment_fill");
-
-            userTransactionRepository.save(transaction);
+            createTransaction(myUserToFill.getEmail(),value,"payment_fill");
 
             // Set the api response data
             apiResponse.setData(value + " were added to " + myUserToFill.getEmail()
@@ -127,13 +178,7 @@ public class TransactionServiceImplementation implements TransactionService{
                 // Set the capital of the user
                 myUserToWithdraw.setCapital(myUserToWithdraw.getCapital()-value);
 
-                UserTransaction transaction = new UserTransaction(
-                        myUserToWithdraw.getEmail(),
-                        value,
-                        LocalDateTime.now().toString(),
-                        "payment_withdraw");
-
-                userTransactionRepository.save(transaction);
+                createTransaction(myUserToWithdraw.getEmail(),value,"payment_withdraw");
 
                 // Set the api response data
                 apiResponse.setData(value + " were withdrawn to " + myUserToWithdraw.getEmail()
@@ -154,41 +199,42 @@ public class TransactionServiceImplementation implements TransactionService{
     @Override
     public APIResponse pay(String token, Double value, String email) {
 
+        // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
+        // Create ArrayList to get token verification and user
         ArrayList<Object> verifyTokenAndGetUser = verifyToken(token);
 
+        // If the token is valid:
         if(verifyTokenAndGetUser.get(1).equals(true)){
-            AppUser myUserToPay = (AppUser) verifyTokenAndGetUser.get(0);
 
-            if(myUserToPay.getCapital() > value){
+            // Create new user with user received for clearer variable use
+            AppUser userPaying = (AppUser) verifyTokenAndGetUser.get(0);
 
-                AppUser myUserByEmail = userRepository.findByEmail(email);
+            // if the capital of the user making the payment is greater than the payment value:
+            if(userPaying.getCapital() > value){
 
-                if(myUserByEmail != null){
+                // Finding the user that will receive the payment
+                AppUser userBeingPaid = userRepository.findByEmail(email);
 
-                    myUserToPay.setCapital(myUserToPay.getCapital()-value);
+                // Verify if the user being paid exists, and it's not the same user making the payment.
+                if(userBeingPaid != null && !(userBeingPaid.getEmail().equals(userPaying.getEmail()))){
 
-                    UserTransaction transactionFrom = new UserTransaction(
-                            myUserToPay.getEmail(),
-                            value,
-                            LocalDateTime.now().toString(),
-                            "payment_made");
+                    // Set the capital of the user making the payment
+                    userPaying.setCapital(userPaying.getCapital()-value);
 
-                    userTransactionRepository.save(transactionFrom);
+                    // Creating a new transaction for the user making the payment
+                    createTransaction(userPaying.getEmail(),value,"payment_made");
 
-                    myUserByEmail.setCapital(myUserByEmail.getCapital()+value);
+                    // Set the capital of the user receiving the payment
+                    userBeingPaid.setCapital(userBeingPaid.getCapital()+value);
 
-                    UserTransaction transactionTo = new UserTransaction(
-                            myUserByEmail.getEmail(),
-                            value,
-                            LocalDateTime.now().toString(),
-                            "payment_received");
+                    // Creating a new transaction for the user receiving the payment
+                    createTransaction(userBeingPaid.getEmail(),value,"payment_received");
 
-                    userTransactionRepository.save(transactionTo);
-
-                    apiResponse.setData(value + " were paid from " + myUserToPay.getEmail()
-                            + " to " + myUserByEmail.getEmail()+ ". Total capital: " + myUserToPay.getCapital());
+                    // Set the api response data
+                    apiResponse.setData(value + " were paid from " + userPaying.getEmail()
+                            + " to " + userBeingPaid.getEmail()+ ". Total capital: " + userPaying.getCapital());
 
                     return apiResponse;
                 }
@@ -201,26 +247,7 @@ public class TransactionServiceImplementation implements TransactionService{
     @Override
     public APIResponse getTransactions(String token, String start_date, String end_date) {
 
-
-        String[] start = start_date.split("-");
-
-        String[] end = end_date.split("-");
-
-
-        int start_year = Integer.parseInt(start[0]);
-
-        int start_month = Integer.parseInt(start[1]);
-
-        int start_day = Integer.parseInt(start[2]);
-
-
-        int end_year = Integer.parseInt(end[0]);
-
-        int end_month = Integer.parseInt(end[1]);
-
-        int end_day = Integer.parseInt(end[2]);
-
-
+        ArrayList<Integer> dates = getDates(start_date,end_date);
 
         APIResponse apiResponse = new APIResponse();
 
@@ -230,15 +257,14 @@ public class TransactionServiceImplementation implements TransactionService{
 
             AppUser myUserToPay = (AppUser) verifyTokenAndGetUser.get(0);
 
+
             List<UserTransaction> transactions = userTransactionRepository.findAllByDateTimeBetweenAndEmail(
-                    LocalDateTime.of(start_year,start_month,start_day,0,0,0) .toString(),
-                    LocalDateTime.of(end_year,end_month,end_day,23,59,59) .toString(),
+                    LocalDateTime.of(dates.get(0),dates.get(1),dates.get(2),0,0,0) .toString(),
+                    LocalDateTime.of(dates.get(3),dates.get(4),dates.get(5),23,59,59) .toString(),
                     myUserToPay.getEmail());
 
             apiResponse.setData(transactions);
-
         }
-
         return apiResponse;
     }
 }
