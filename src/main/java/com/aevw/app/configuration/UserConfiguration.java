@@ -2,7 +2,7 @@ package com.aevw.app.configuration;
 
 import com.aevw.app.entity.AppUser;
 import com.aevw.app.repository.UserRepository;
-import com.aevw.app.service.UserService;
+import com.aevw.app.service.user.UserService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

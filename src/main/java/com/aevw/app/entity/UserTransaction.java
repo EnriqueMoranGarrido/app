@@ -1,5 +1,7 @@
 package com.aevw.app.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.persistence.*;
 import java.util.HashMap;
 
@@ -19,8 +21,6 @@ public class UserTransaction {
     private Double money = 0.0;
 
     private String type;
-
-
 
     public UserTransaction() {
     }
@@ -47,8 +47,6 @@ public class UserTransaction {
     public void setMoney(Double money) {
         this.money = money;
     }
-
-
 
     public String getDateTime() {
         return dateTime;

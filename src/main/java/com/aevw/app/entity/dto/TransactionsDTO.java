@@ -1,4 +1,4 @@
-package com.aevw.app.entity;
+package com.aevw.app.entity.dto;
 
 public class TransactionsDTO {
 

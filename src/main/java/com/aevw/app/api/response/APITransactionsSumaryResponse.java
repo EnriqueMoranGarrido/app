@@ -1,21 +1,21 @@
-package com.aevw.app.api;
+package com.aevw.app.api.response;
 
 import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
 
-public class APIResponse {
+public class APITransactionsSumaryResponse {
 
     private HttpStatus status;
-    private Object data;
+    private Object transactions;
     private Object error;
 
-    public APIResponse() {
+    public APITransactionsSumaryResponse() {
         this.status = HttpStatus.OK;
     }
 
-    public APIResponse(Object data, Object error) {
+    public APITransactionsSumaryResponse(Object transactions, Object error) {
         this.status = HttpStatus.OK;
-        this.data = data;
+        this.transactions = transactions;
         this.error = error;
     }
 
@@ -27,16 +27,16 @@ public class APIResponse {
         this.status = status;
     }
 
-    public Object getData() {
-        return data;
+    public Object getTransactions() {
+        return transactions;
     }
 
-    public void setData(Object data) {
-        this.data = data;
+    public void setTransactions(Object transactions) {
+        this.transactions = transactions;
     }
 
-    public void setDataJson(JSONObject data){
-        this.data = data;
+    public void setDataJson(JSONObject transactions){
+        this.transactions = transactions;
     }
 
     public Object getError() {
@@ -46,5 +46,4 @@ public class APIResponse {
     public void setError(Object error) {
         this.error = error;
     }
-
 }

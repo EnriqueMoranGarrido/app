@@ -1,9 +1,9 @@
-package com.aevw.app.service;
+package com.aevw.app.service.transaction;
 
-import com.aevw.app.api.APIResponse;
-import com.aevw.app.api.TransactionsSumaryResponse;
+import com.aevw.app.api.response.APIResponse;
+import com.aevw.app.api.response.APITransactionsSumaryResponse;
 import com.aevw.app.entity.AppUser;
-import com.aevw.app.entity.TransactionsDTO;
+import com.aevw.app.entity.dto.TransactionsDTO;
 import com.aevw.app.entity.UserToken;
 import com.aevw.app.entity.UserTransaction;
 import com.aevw.app.exception.ApiRequestException;
@@ -246,13 +246,13 @@ public class TransactionServiceImplementation implements TransactionService{
     }
 
     @Override
-    public TransactionsSumaryResponse getTransactions(String token, String start_date, String end_date) {
+    public APITransactionsSumaryResponse getTransactions(String token, String start_date, String end_date) {
 
         // Transform the start and end dates from Strings to Integers
         ArrayList<Integer> dates = getDates(start_date,end_date);
 
         // Create new API Response
-        TransactionsSumaryResponse transactionResponse = new TransactionsSumaryResponse();
+        APITransactionsSumaryResponse transactionResponse = new APITransactionsSumaryResponse();
 
         // Create ArrayList to get token verification and user
         ArrayList<Object> verifyTokenAndGetUser = verifyToken(token);

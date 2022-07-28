@@ -16,7 +16,6 @@ public class UserToken {
 
     private String userEmail;
 
-
     public UserToken(String token, String userEmail, String id) {
         this.token = token;
         this.userEmail = userEmail;

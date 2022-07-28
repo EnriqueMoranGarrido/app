@@ -1,24 +1,15 @@
 package com.aevw.app.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
-import java.net.http.HttpRequest;
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
 
 @Entity
-//@Table(name="users")
 public class AppUser {
 
     @Id
@@ -47,18 +38,10 @@ public class AppUser {
     @Size(min = 2, message = "Password should have at least 2 characters")
     private String password;
 
-    @Transient
-    private Integer age;
-
     private Double capital = 0.0;
 
     @JsonFormat
     private String token ="";
-
-    private Boolean isActive = true;
-
-    @Transient
-    private HashMap<String,Object> transactions;
 
     public String getToken() {
         return token;
@@ -72,29 +55,6 @@ public class AppUser {
 
     }
 
-
-    public AppUser(String id, String firstName, String lastName, LocalDate birthDate, String email, String password, Integer age) {
-
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.birthDate = birthDate;
-        this.email = email;
-        this.password = passwordEncoder.encode(password);
-        this.age = age;
-    }
-
-    public AppUser(String firstName, String lastName, LocalDate birthDate, String email, String password) {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.birthDate = birthDate;
-        this.email = email;
-        this.password = passwordEncoder.encode(password);
-    }
-
     public AppUser(String id, String firstName, String lastName, LocalDate birthDate, String email, String password) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         this.id = id;
@@ -105,15 +65,11 @@ public class AppUser {
         this.password = passwordEncoder.encode(password);
     }
 
-
-
-
     public Integer getAge() {
         return Period.between(this.birthDate,LocalDate.now()).getYears();
     }
 
     public void setAge(Integer age) {
-        this.age = age;
     }
 
 
@@ -166,14 +122,6 @@ public class AppUser {
         this.password = passwordEncoder.encode(password);
     }
 
-    public Boolean getActive() {
-        return isActive;
-    }
-
-    public void setActive(Boolean active) {
-        isActive = active;
-    }
-
     public Double getCapital() {
         return capital;
     }
@@ -182,11 +130,4 @@ public class AppUser {
         this.capital = capital;
     }
 
-    public HashMap<String, Object> getTransactions() {
-        return transactions;
-    }
-
-    public void setTransactions(HashMap<String, Object> transactions) {
-        this.transactions = transactions;
-    }
 }

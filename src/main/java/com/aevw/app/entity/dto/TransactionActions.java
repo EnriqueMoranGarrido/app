@@ -1,4 +1,4 @@
-package com.aevw.app.entity;
+package com.aevw.app.entity.dto;
 
 import javax.validation.constraints.*;
 
@@ -7,12 +7,9 @@ public class TransactionActions {
     @NotBlank(message = "Value is mandatory")
     private Integer value;
 
-
     private String email;
 
-
     private String start_date;
-
 
     private String end_date;
 

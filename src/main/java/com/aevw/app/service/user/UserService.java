@@ -1,10 +1,8 @@
-package com.aevw.app.service;
+package com.aevw.app.service.user;
 
-import com.aevw.app.api.APIResponse;
+import com.aevw.app.api.response.APIResponse;
 import com.aevw.app.entity.AppUser;
-import com.aevw.app.entity.UserLogInRequest;
-import org.json.JSONObject;
-import org.springframework.http.ResponseEntity;
+import com.aevw.app.entity.dto.UserLogInRequest;
 
 import java.util.List;
 import java.util.Map;

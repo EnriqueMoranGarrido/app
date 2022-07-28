@@ -1,4 +1,4 @@
-package com.aevw.app.entity;
+package com.aevw.app.entity.dto;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
