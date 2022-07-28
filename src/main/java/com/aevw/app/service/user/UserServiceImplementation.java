@@ -233,8 +233,6 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
             System.out.println("An error has ocurred");
             throw new ApiRequestException("Invalid token, try again!");
         }
-
-//        apiResponse.setData("Done, token was invalidated: " +  token);
         return apiResponse;
 
     }
