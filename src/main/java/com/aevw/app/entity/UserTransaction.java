@@ -1,20 +1,13 @@
 package com.aevw.app.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
 import javax.persistence.*;
-import java.util.HashMap;
 
 @Entity
 public class UserTransaction {
 
-//    @GeneratedValue(strategy = GenerationType.AUTO)
-
     @Id
     @Column(name = "date_time", nullable = false)
     private String dateTime;
-
-//    @Column(name = "token", nullable = false)
 
     private String email;
 
