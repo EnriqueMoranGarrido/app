@@ -5,9 +5,11 @@ import com.aevw.app.service.user.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.junit.jupiter.api.Assertions;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
 
+@SpringBootTest
 class TransactionServiceImplementationGetDatesMethodTest {
 
     @Autowired
@@ -25,6 +27,16 @@ class TransactionServiceImplementationGetDatesMethodTest {
 
         Assertions.assertNotNull(testDates);
 
+    }
+
+    @Test
+    void getDatesInstanceOfArrayList(){
+        String rawStartDate = "2021-04-12";
+        String rawEndDate = "2022-08-31";
+
+        ArrayList<Integer> testDates = transactionServiceImplementation.getDates(rawStartDate,rawEndDate);
+
+        Assertions.assertInstanceOf(ArrayList.class,testDates);
     }
 
     @Test
@@ -136,9 +148,7 @@ class TransactionServiceImplementationGetDatesMethodTest {
         String rawEndDate = "";
 
         Exception exception = Assertions.assertThrows(
-                ApiRequestException.class,()->{
-                    transactionServiceImplementation.getDates(rawStartDate,rawEndDate);
-                }
+                ApiRequestException.class,()-> transactionServiceImplementation.getDates(rawStartDate,rawEndDate)
         );
         String expectedMessage = "Invalid data, try again!";
         String actualMessage = exception.getMessage();
@@ -150,9 +160,7 @@ class TransactionServiceImplementationGetDatesMethodTest {
     void getDatesThrowsAPIRequestException_InvalidData_PassingNull(){
 
         Exception exception = Assertions.assertThrows(
-                ApiRequestException.class,()->{
-                    transactionServiceImplementation.getDates(null,null);
-                }
+                ApiRequestException.class,()-> transactionServiceImplementation.getDates(null,null)
         );
         String expectedMessage = "Invalid data, try again!";
         String actualMessage = exception.getMessage();
@@ -167,9 +175,7 @@ class TransactionServiceImplementationGetDatesMethodTest {
         String rawEndDate = "2022-08-31";
 
         Exception exception = Assertions.assertThrows(
-                ApiRequestException.class,()->{
-                    transactionServiceImplementation.getDates(null,null);
-                }
+                ApiRequestException.class,()-> transactionServiceImplementation.getDates(null,null)
         );
         String expectedMessage = "Invalid data, try again!";
         String actualMessage = exception.getMessage();
@@ -184,9 +190,7 @@ class TransactionServiceImplementationGetDatesMethodTest {
         String rawEndDate = "20220831";
 
         Exception exception = Assertions.assertThrows(
-                ApiRequestException.class,()->{
-                    transactionServiceImplementation.getDates(null,null);
-                }
+                ApiRequestException.class,()-> transactionServiceImplementation.getDates(null,null)
         );
         String expectedMessage = "Invalid data, try again!";
         String actualMessage = exception.getMessage();
@@ -202,9 +206,7 @@ class TransactionServiceImplementationGetDatesMethodTest {
         String rawEndDate = "2022";
 
         Exception exception = Assertions.assertThrows(
-                    ApiRequestException.class,()->{
-                    transactionServiceImplementation.getDates(rawStartDate,rawEndDate);
-                    }
+                    ApiRequestException.class,()-> transactionServiceImplementation.getDates(rawStartDate,rawEndDate)
                 );
         String expectedMessage = "Invalid data, try again!";
         String actualMessage = exception.getMessage();
@@ -219,9 +221,7 @@ class TransactionServiceImplementationGetDatesMethodTest {
         String rawEndDate = "02";
 
         Exception exception = Assertions.assertThrows(
-                ApiRequestException.class,()->{
-                    transactionServiceImplementation.getDates(rawStartDate,rawEndDate);
-                }
+                ApiRequestException.class,()-> transactionServiceImplementation.getDates(rawStartDate,rawEndDate)
         );
         String expectedMessage = "Invalid data, try again!";
         String actualMessage = exception.getMessage();
@@ -236,13 +236,90 @@ class TransactionServiceImplementationGetDatesMethodTest {
         String rawEndDate = "2022-02";
 
         Exception exception = Assertions.assertThrows(
-                ApiRequestException.class,()->{
-                    transactionServiceImplementation.getDates(rawStartDate,rawEndDate);
-                }
+                ApiRequestException.class,()-> transactionServiceImplementation.getDates(rawStartDate,rawEndDate)
         );
         String expectedMessage = "Invalid data, try again!";
         String actualMessage = exception.getMessage();
 
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
+
     }
+
+    @Test
+    void getDates_DoesNotThrow_APIRequestException(){
+
+        String rawStartDate = "2021-04-12";
+        String rawEndDate = "2022-08-31";
+
+        Assertions.assertDoesNotThrow(()->{
+            ArrayList<Integer> testDates = transactionServiceImplementation.getDates(rawStartDate,rawEndDate);});
+
+    }
+
+    @Test
+    void getDates_InstanceOfInteger_StartDateYear(){
+
+        String rawStartDate = "2021-04-12";
+        String rawEndDate = "2022-08-31";
+
+        ArrayList<Integer> testDates = transactionServiceImplementation.getDates(rawStartDate,rawEndDate);
+
+        Assertions.assertInstanceOf(Integer.class, testDates.get(0));
+    }
+
+    @Test
+    void getDates_InstanceOfInteger_StartDateMonth(){
+
+        String rawStartDate = "2021-04-12";
+        String rawEndDate = "2022-08-31";
+
+        ArrayList<Integer> testDates = transactionServiceImplementation.getDates(rawStartDate,rawEndDate);
+
+        Assertions.assertInstanceOf(Integer.class, testDates.get(1));
+    }
+
+    @Test
+    void getDates_InstanceOfInteger_StartDateDay(){
+
+        String rawStartDate = "2021-04-12";
+        String rawEndDate = "2022-08-31";
+
+        ArrayList<Integer> testDates = transactionServiceImplementation.getDates(rawStartDate,rawEndDate);
+
+        Assertions.assertInstanceOf(Integer.class, testDates.get(2));
+    }
+
+    @Test
+    void getDates_InstanceOfInteger_EndDateYear(){
+
+        String rawStartDate = "2021-04-12";
+        String rawEndDate = "2022-08-31";
+
+        ArrayList<Integer> testDates = transactionServiceImplementation.getDates(rawStartDate,rawEndDate);
+
+        Assertions.assertInstanceOf(Integer.class, testDates.get(3));
+    }
+
+    @Test
+    void getDates_InstanceOfInteger_EndDateMonth(){
+
+        String rawStartDate = "2021-04-12";
+        String rawEndDate = "2022-08-31";
+
+        ArrayList<Integer> testDates = transactionServiceImplementation.getDates(rawStartDate,rawEndDate);
+
+        Assertions.assertInstanceOf(Integer.class, testDates.get(4));
+    }
+
+    @Test
+    void getDates_InstanceOfInteger_EndDateDay(){
+
+        String rawStartDate = "2021-04-12";
+        String rawEndDate = "2022-08-31";
+
+        ArrayList<Integer> testDates = transactionServiceImplementation.getDates(rawStartDate,rawEndDate);
+
+        Assertions.assertInstanceOf(Integer.class, testDates.get(5));
+    }
+
 }
