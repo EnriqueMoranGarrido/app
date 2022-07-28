@@ -36,7 +36,7 @@ public class TransactionServiceImplementation implements TransactionService{
 
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////        VERIFY TOKEN         ///////////////////////////////
-    private ArrayList<Object> verifyToken(String token){
+    public ArrayList<Object> verifyToken(String token){
 
         UserToken myUserToken = userTokenRepository.findByToken(token);
 
@@ -68,7 +68,7 @@ public class TransactionServiceImplementation implements TransactionService{
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////        CREATE TRANSACTION         ////////////////////////////
 
-    private void createTransaction(String email, Double value, String type){
+    public void createTransaction(String email, Double value, String type){
         try{
             UserTransaction transaction = new UserTransaction(
                 email,
@@ -83,7 +83,10 @@ public class TransactionServiceImplementation implements TransactionService{
         }
     }
 
-    private ArrayList<Integer> getDates(String start_date, String end_date){
+    //////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////              GET DATES              ///////////////////////////
+
+    public ArrayList<Integer> getDates(String start_date, String end_date){
 
         // Try converting the Strings into Integers
         try{
