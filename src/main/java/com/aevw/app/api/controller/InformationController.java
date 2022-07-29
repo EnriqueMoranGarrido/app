@@ -2,6 +2,7 @@ package com.aevw.app.api.controller;
 
 import com.aevw.app.api.response.APIResponse;
 import com.aevw.app.entity.dto.InformationBalanceDTO;
+import com.aevw.app.entity.dto.InformationSummaryDTO;
 import com.aevw.app.entity.dto.TransactionActions;
 import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.service.transaction.TransactionService;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(path = "/information")
 public class InformationController {
-    
+
 
     @GetMapping("/balance")
     public ResponseEntity<Object> getBalance(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
@@ -26,10 +27,10 @@ public class InformationController {
 
     @GetMapping("/summary")
     public ResponseEntity<Object> getSummary(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-                                             @RequestBody String currency){
+                                             @RequestBody InformationSummaryDTO summaryDTO){
 
         APIResponse apiResponse = new APIResponse();
-        apiResponse.setData(currency);
+        apiResponse.setData(summaryDTO.getCurrency()+summaryDTO.getStart_date()+summaryDTO.getEnd_date());
 
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse.getData());
     }
