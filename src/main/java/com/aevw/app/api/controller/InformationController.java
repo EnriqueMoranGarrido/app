@@ -6,6 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.money.Monetary;
+import javax.money.MonetaryAmount;
+import javax.money.convert.CurrencyConversion;
+import javax.money.convert.MonetaryConversions;
+
 @RestController
 @RequestMapping(path = "/information")
 public class InformationController {
@@ -28,7 +33,14 @@ public class InformationController {
         APIResponse apiResponse = new APIResponse();
         apiResponse.setData(summary.getCurrency()+summary.getStart_date()+summary.getEnd_date());
 
-        return ResponseEntity.status(HttpStatus.OK).body(apiResponse.getData());
+        MonetaryAmount money = Monetary.getDefaultAmountFactory().setCurrency("USD").setNumber(100).create();
+
+        CurrencyConversion conversion = MonetaryConversions.getConversion(summary.getCurrency());
+
+        MonetaryAmount convertedMoney = money.with(conversion);
+
+
+        return ResponseEntity.status(HttpStatus.OK).body(convertedMoney.toString());
     }
 
     @GetMapping("/series")
