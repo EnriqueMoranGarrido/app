@@ -15,6 +15,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
+import org.json.JSONString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -151,10 +152,16 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
         // Create encoder
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+//        JSONObject root = new JSONObject();
+//
+//        J
         // Read credentials information
-        JSONObject root = new JSONObject(credentials);
-        String email = (String) root.get("email");
-        String password = (String) root.get("password");
+//        JSONObject root = new JSONObject(credentials);
+//        String email = (String) root.get("email");
+//        String password = (String) root.get("password");
+
+        String email = credentials.getEmail();
+        String password = credentials.getPassword();
 
         // Validate user identity
 

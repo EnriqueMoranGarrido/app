@@ -80,7 +80,7 @@ public class TransactionController {
 
     @GetMapping()
     public ResponseEntity<APITransactionsSumaryResponse> getTransactions(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-                                                                         @RequestBody TransactionActions transactionActions){
+                                                                         @RequestBody TransactionActions transactionActions) {
 
         try{
             APITransactionsSumaryResponse apiResponse = transactionService.getTransactions(

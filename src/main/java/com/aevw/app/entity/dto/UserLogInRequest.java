@@ -22,6 +22,9 @@ public class UserLogInRequest {
         this.password = password;
     }
 
+    public UserLogInRequest() {
+    }
+
     public String getEmail() {
         return email;
     }

@@ -167,7 +167,6 @@ class TransactionServiceImplementationCreateTransactionMethodTest {
         transactionServiceImplementation.createTransaction(rawEmail,rawValue,rawType);
         UserTransaction userTransactionTest = userTransactionRepository.findByEmail(rawEmail);
 
-//        Assertions.assertDoesNotThrow(userTransactionTest);
         Assertions.assertNotSame("10",userTransactionTest.getMoney());
     }
 

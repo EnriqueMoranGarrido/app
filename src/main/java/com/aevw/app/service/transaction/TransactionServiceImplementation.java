@@ -248,6 +248,9 @@ public class TransactionServiceImplementation implements TransactionService{
         throw new ApiRequestException("Could not fulfill transaction");
     }
 
+
+    //////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////        GET         ////////////////////////////////////
     @Override
     public APITransactionsSumaryResponse getTransactions(String token, String start_date, String end_date) {
 
