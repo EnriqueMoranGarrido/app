@@ -64,10 +64,10 @@ class TransactionControllerTest {
     String testEmail = "testFill1@mail.com";
     String testEmailTwo = "testoPay@mail.com";
     String testPassword = "password";
-
     String startDate = "2022-01-01";
-
     String endDate = "2022-07-28";
+
+    String emptyEndDate = "2022-07-27";
     Double testValueToFill = 100.0;
     Double testValueToWithdraw = 50.0;
 
@@ -84,19 +84,17 @@ class TransactionControllerTest {
         UserLogInRequest logInRequestTest = new UserLogInRequest(testEmail,testPassword);
         APIResponse apiResponseTest =  userService.logInUser(logInRequestTest);
         HashMap<String,String> logInToken = (HashMap<String, String>) apiResponseTest.getData();
-        String token = logInToken.get("token");
 
-        return token;
+        return logInToken.get("token");
     }
 
     private String getNewDate(){
         String dateString = LocalDateTime.now().toString();
         String testMinutes = String.valueOf(Integer.parseInt(dateString.split("-")[2].split(":")[1]) - 1);
-        String testDate = dateString.replace(
+
+        return dateString.replace(
                 String.valueOf(Integer.parseInt(dateString.split("-")[2].split(":")[1])) ,
                 testMinutes);
-
-        return testDate;
 
     }
 
@@ -178,9 +176,9 @@ class TransactionControllerTest {
 
         APIResponse realApiResponse = transactionService.fill(token,testValueToFill);
         String[] responseData = realApiResponse.getData().toString().split(" ");
-        Double realValue =  Double.valueOf(responseData[0]);
+        double realValue = Double.parseDouble(responseData[0]);
 
-        Assertions.assertFalse(realValue == 50.0);
+        assertNotEquals(50.0, realValue, 0.0);
 
     }
 
@@ -326,9 +324,9 @@ class TransactionControllerTest {
         APIResponse realApiResponse = transactionService.fill(token,testValueToFill);
         APIResponse realApiResponseWithdraw = transactionService.withdraw(token,testValueToWithdraw);
         String[] responseData = realApiResponseWithdraw.getData().toString().split(" ");
-        Double realValue =  Double.valueOf(responseData[0]);
+        double realValue = Double.parseDouble(responseData[0]);
 
-        Assertions.assertFalse(realValue == 2.0);
+        assertNotEquals(2.0, realValue, 0.0);
 
     }
 
@@ -475,9 +473,9 @@ class TransactionControllerTest {
         APIResponse realApiResponse = transactionService.fill(token,testValueToFill);
         APIResponse realApiResponsePay = transactionService.pay(token,testValueToWithdraw,testEmailTwo);
         String[] responseData = realApiResponsePay.getData().toString().split(" ");
-        Double realValue =  Double.valueOf(responseData[0]);
+        double realValue = Double.parseDouble(responseData[0]);
 
-        Assertions.assertFalse(realValue == 2.0);
+        assertNotEquals(2.0, realValue, 0.0);
 
     }
 
@@ -627,7 +625,7 @@ class TransactionControllerTest {
         String token = CreateAndLogInTestUser();
 
         APITransactionsSumaryResponse realApiResponseGet =
-                transactionService.getTransactions(token,startDate,endDate);
+                transactionService.getTransactions(token,startDate,emptyEndDate);
 
         ArrayList<Object> myArrayTest= new ArrayList<>();
 
