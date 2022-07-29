@@ -43,14 +43,6 @@ public class AppUser {
     @JsonFormat
     private String token ="";
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
     public AppUser() {
 
     }
@@ -128,6 +120,14 @@ public class AppUser {
 
     public void setCapital(Double capital) {
         this.capital = capital;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
 }

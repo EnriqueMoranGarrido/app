@@ -115,13 +115,8 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
         System.out.println(user);
 
         return myNewUser;
-
     }
 
-    @Override
-    public void logoutUser(Map<String,String> token){
-        System.out.println("token no longer valid");
-    }
 
     @Override
     public APIResponse signUpNewUser(AppUser userSignUpRequest) {
@@ -152,14 +147,7 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
         // Create encoder
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-//        JSONObject root = new JSONObject();
-//
-//        J
         // Read credentials information
-//        JSONObject root = new JSONObject(credentials);
-//        String email = (String) root.get("email");
-//        String password = (String) root.get("password");
-
         String email = credentials.getEmail();
         String password = credentials.getPassword();
 

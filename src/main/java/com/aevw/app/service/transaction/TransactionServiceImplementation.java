@@ -177,7 +177,7 @@ public class TransactionServiceImplementation implements TransactionService{
             AppUser myUserToWithdraw = (AppUser) verifyTokenAndGetUser.get(0);
 
             // If the user's capital is greater than the withdrawal requested:
-            if(myUserToWithdraw.getCapital() > value){
+            if(myUserToWithdraw.getCapital() >= value){
 
                 // Set the capital of the user
                 myUserToWithdraw.setCapital(myUserToWithdraw.getCapital()-value);

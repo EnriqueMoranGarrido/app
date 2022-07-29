@@ -65,9 +65,7 @@ class TransactionControllerTest {
     String testEmailTwo = "testoPay@mail.com";
     String testPassword = "password";
     String startDate = "2022-01-01";
-    String endDate = "2022-07-28";
-
-    String emptyEndDate = "2022-07-27";
+    String endDate = "2022-07-29";
     Double testValueToFill = 100.0;
     Double testValueToWithdraw = 50.0;
 
@@ -622,6 +620,7 @@ class TransactionControllerTest {
     @Test
     void getTransaction_ValueEmpty() {
 
+        String emptyEndDate = "2022-07-27";
         String token = CreateAndLogInTestUser();
 
         APITransactionsSumaryResponse realApiResponseGet =

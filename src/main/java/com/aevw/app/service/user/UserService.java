@@ -5,7 +5,6 @@ import com.aevw.app.entity.AppUser;
 import com.aevw.app.entity.dto.UserLogInRequest;
 
 import java.util.List;
-import java.util.Map;
 
 public interface UserService {
     AppUser saveUser(AppUser user);
@@ -16,8 +15,6 @@ public interface UserService {
     void addNewUser(AppUser user);
 
     AppUser addUser(AppUser user);
-
-    void logoutUser(Map<String,String> token);
 
     APIResponse signUpNewUser(AppUser user);
 
