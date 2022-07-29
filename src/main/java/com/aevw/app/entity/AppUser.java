@@ -1,13 +1,21 @@
 package com.aevw.app.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.data.convert.Jsr310Converters;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.money.Monetary;
+import javax.money.MonetaryAmount;
 import javax.persistence.*;
 import javax.validation.constraints.*;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.Period;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.TimeZone;
 
 @Entity
 public class AppUser {
@@ -40,10 +48,12 @@ public class AppUser {
 
     private Double capital = 0.0;
 
+    @Transient
+    private MonetaryAmount myMoney;
+
     public AppUser() {
 
     }
-
     public AppUser(String id, String firstName, String lastName, LocalDate birthDate, String email, String password) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         this.id = id;
@@ -52,10 +62,8 @@ public class AppUser {
         this.birthDate = birthDate;
         this.email = email;
         this.password = passwordEncoder.encode(password);
-    }
+        this.myMoney = Monetary.getDefaultAmountFactory().setCurrency("USD").setNumber(0.0).create();
 
-    public Integer getAge() {
-        return Period.between(this.birthDate,LocalDate.now()).getYears();
     }
 
     public void setAge(Integer age) {
