@@ -15,6 +15,8 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.convert.JodaTimeConverters;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,6 +27,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service @Transactional @Slf4j
@@ -76,7 +81,6 @@ public class UserServiceImplementation implements UserService {
         if(userByEmail.isPresent()){
             throw new ApiRequestException("Email already registered");
         }
-
         AppUser userEntity = userRepository.save(userSignUpRequest);
 
         userRepository.save(userEntity);
