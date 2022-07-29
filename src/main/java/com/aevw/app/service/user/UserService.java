@@ -18,6 +18,6 @@ public interface UserService {
 
     APIResponse logInUser(UserLogInRequest credentials);
 
-    APIResponse verifyToken (String authorizarion);
+    APIResponse logOUt (String authorizarion);
 
 }

@@ -47,7 +47,7 @@ public class UserController {
     @PostMapping("/logout")
     public ResponseEntity<APIResponse> privateApi(@RequestHeader (value = "Authorization", defaultValue = "") String auth){
 
-        APIResponse apiResponse = userService.verifyToken(auth);
+        APIResponse apiResponse = userService.logOUt(auth);
 
         return ResponseEntity
                 .status(apiResponse.getStatus())

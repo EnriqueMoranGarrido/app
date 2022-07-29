@@ -142,7 +142,7 @@ public class UserServiceImplementation implements UserService {
     }
 
 
-    public  APIResponse verifyToken(String token){
+    public  APIResponse logOUt(String token){
         // Create API response
 
         APIResponse apiResponse = new APIResponse();
