@@ -14,8 +14,6 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
-import org.json.JSONString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,46 +28,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service @Transactional @Slf4j
-public class UserServiceImplementation implements UserService, UserDetailsService {
+public class UserServiceImplementation implements UserService {
 
     @Autowired
     private  UserRepository userRepository;
 
     @Autowired
     private  UserTokenRepository userTokenRepository;
-
-
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        AppUser user = userRepository.findByEmail(email);
-        if(user == null){
-            log.error("User not found in the database");
-            throw new UsernameNotFoundException("User not found in the database");
-        }
-        else {
-            log.error("User {} found in the database",userRepository.findByEmail(email).getFirstName());
-        }
-
-
-        return null;
-    }
-
-    @Override
-    public AppUser saveUser(AppUser user) {
-        System.out.println("Saving new user");
-        log.info("Saving new user - first name: {} last name {} email {} ", user.getFirstName(), user.getLastName(), user.getEmail());
-        return userRepository.save(user);
-    }
-
-    @Override
-    public AppUser getUser(String email) {
-        System.out.println("Fetching user");
-        System.out.println(email);
-
-        log.info("Fetching user - email provided: {} user first name: {} user last name: {} ", email, userRepository.findByEmail(email).getFirstName(),userRepository.findByEmail(email).getLastName());
-        log.info("{}",userRepository.findByEmail(email));
-        return userRepository.findByEmail(email);
-    }
 
     @Override
     public List<AppUser> getUsers() {
@@ -79,25 +44,9 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
     }
 
     @Override
-    public List<AppUser> saveUsers(List<AppUser> users) {
+    public void saveUsers(List<AppUser> users) {
         log.info("Saving users: {}", users.stream().map(AppUser::getEmail));
-        return userRepository.saveAll(users);
-    }
-
-    @Override
-    public void addNewUser(AppUser user) {
-
-        Optional<AppUser> userByEmail = userRepository.findAppUserByEmail(user.getEmail());
-        
-        if(userByEmail.isPresent()){
-            throw new IllegalStateException("Email already registered");
-        }
-
-        userRepository.save(user);
-
-        System.out.println(user.getEmail());
-        System.out.println(user);
-
+        userRepository.saveAll(users);
     }
 
     @Override
@@ -173,8 +122,7 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
                 jsonObject.put("email",myUser.getEmail());
                 jsonObject.put("token",token);
 
-                // Saving Token in user and token tables
-                myUser.setToken(token);
+                // Saving Token in User Token table
                 UserToken myUserToken = new UserToken(token,myUser.getEmail(),myUser.getId());
                 userTokenRepository.save(myUserToken);
 
@@ -211,18 +159,9 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
                     .build(); //Reusable verifier instance
             DecodedJWT jwt = verifier.verify(token);
 
-            AppUser myUserByToken = userRepository.findByEmail(myUserToken.getUserEmail());
+            myUserToken.setToken("");
+            apiResponse.setData("Done, token was invalidated: " + token);
 
-            if(myUserByToken.getToken().equals(myUserToken.getToken())) {
-                apiResponse.setData("Done, token was invalidated: " + myUserByToken.getToken());
-
-                // Reset the token attribute in user and token tables
-                myUserByToken.setToken("");
-                myUserToken.setToken("");
-
-            }else{
-                throw new ApiRequestException("Wrong token");
-            }
         } catch (JWTVerificationException exception){
             //Invalid signature/claims
             System.out.println("An error has ocurred");
@@ -231,4 +170,5 @@ public class UserServiceImplementation implements UserService, UserDetailsServic
         return apiResponse;
 
     }
+
 }

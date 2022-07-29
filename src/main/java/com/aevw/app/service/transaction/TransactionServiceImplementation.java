@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -36,7 +37,7 @@ public class TransactionServiceImplementation implements TransactionService{
 
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////        VERIFY TOKEN         ///////////////////////////////
-    public ArrayList<Object> verifyToken(String token){
+    public Optional<AppUser> verifyToken(String token){
 
         UserToken myUserToken = userTokenRepository.findByToken(token);
 
@@ -52,16 +53,11 @@ public class TransactionServiceImplementation implements TransactionService{
                     .build(); //Reusable verifier instance
             DecodedJWT jwt = verifier.verify(token);
 
-            AppUser myUserByToken = userRepository.findByEmail(myUserToken.getUserEmail());
-
-            myReturnArray.add(myUserByToken);
-            myReturnArray.add(myUserByToken.getToken().equals(myUserToken.getToken()));
-
-            return myReturnArray;
+            return Optional.ofNullable(userRepository.findByEmail(myUserToken.getUserEmail()));
 
         } catch (JWTVerificationException exception){
             //Invalid signature/claims
-            return myReturnArray;
+            throw new ApiRequestException("Token not found, try again");
         }
     }
 
@@ -133,14 +129,14 @@ public class TransactionServiceImplementation implements TransactionService{
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
-        // Create ArrayList to get token verification and user
-        ArrayList<Object> verifyTokenAndGetUser = verifyToken(token);
+        // Create an Optional with the AppUser to get the user by token
+        Optional<AppUser> verifyTokenAndGetUser = verifyToken(token);
 
         // If the token is valid:
-        if(verifyTokenAndGetUser.get(1).equals(true)){
+        if(verifyTokenAndGetUser.isPresent()){
 
             // Create new user with user received for clearer variable use
-            AppUser myUserToFill = (AppUser) verifyTokenAndGetUser.get(0);
+            AppUser myUserToFill = verifyTokenAndGetUser.get();
 
             // Set the capital of the user
             myUserToFill.setCapital(myUserToFill.getCapital()+value);
@@ -167,14 +163,14 @@ public class TransactionServiceImplementation implements TransactionService{
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
-        // Create ArrayList to get token verification and user
-        ArrayList<Object> verifyTokenAndGetUser = verifyToken(token);
+        // Create an Optional with the AppUser to get the user by token
+        Optional<AppUser> verifyTokenAndGetUser = verifyToken(token);
 
         // If the token is valid:
-        if(verifyTokenAndGetUser.get(1).equals(true)){
+        if(verifyTokenAndGetUser.isPresent()){
 
             // Create new user with user received for clearer variable use
-            AppUser myUserToWithdraw = (AppUser) verifyTokenAndGetUser.get(0);
+            AppUser myUserToWithdraw = verifyTokenAndGetUser.get();
 
             // If the user's capital is greater than the withdrawal requested:
             if(myUserToWithdraw.getCapital() >= value){
@@ -206,14 +202,14 @@ public class TransactionServiceImplementation implements TransactionService{
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
-        // Create ArrayList to get token verification and user
-        ArrayList<Object> verifyTokenAndGetUser = verifyToken(token);
+        // Create an Optional with the AppUser to get the user by token
+        Optional<AppUser> verifyTokenAndGetUser = verifyToken(token);
 
         // If the token is valid:
-        if(verifyTokenAndGetUser.get(1).equals(true)){
+        if(verifyTokenAndGetUser.isPresent()){
 
             // Create new user with user received for clearer variable use
-            AppUser userPaying = (AppUser) verifyTokenAndGetUser.get(0);
+            AppUser userPaying = verifyTokenAndGetUser.get();
 
             // if the capital of the user making the payment is greater than the payment value:
             if(userPaying.getCapital() > value){
@@ -260,20 +256,20 @@ public class TransactionServiceImplementation implements TransactionService{
         // Create new API Response
         APITransactionsSumaryResponse transactionResponse = new APITransactionsSumaryResponse();
 
-        // Create ArrayList to get token verification and user
-        ArrayList<Object> verifyTokenAndGetUser = verifyToken(token);
+        // Create an Optional with the AppUser to get the user by token
+        Optional<AppUser> verifyTokenAndGetUser = verifyToken(token);
 
         // If the token is valid:
-        if(verifyTokenAndGetUser.get(1).equals(true)) {
+        if(verifyTokenAndGetUser.isPresent()){
 
             // Create new user with user received for clearer variable use
-            AppUser myUserToPay = (AppUser) verifyTokenAndGetUser.get(0);
+            AppUser userRequestionTransactions = verifyTokenAndGetUser.get();
 
             // Get the transactions between the provided dates for this user
             List<UserTransaction> transactions = userTransactionRepository.findAllByDateTimeBetweenAndEmail(
                     LocalDateTime.of(dates.get(0),dates.get(1),dates.get(2),0,0,0) .toString(),
                     LocalDateTime.of(dates.get(3),dates.get(4),dates.get(5),23,59,59) .toString(),
-                    myUserToPay.getEmail());
+                    userRequestionTransactions.getEmail());
 
             ArrayList<TransactionsDTO> myResponseTransactions = new ArrayList<>();
 

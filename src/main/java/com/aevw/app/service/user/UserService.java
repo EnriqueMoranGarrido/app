@@ -7,12 +7,10 @@ import com.aevw.app.entity.dto.UserLogInRequest;
 import java.util.List;
 
 public interface UserService {
-    AppUser saveUser(AppUser user);
-    AppUser getUser(String email);
+
     List<AppUser> getUsers();
 
-    List<AppUser> saveUsers(List<AppUser> users);
-    void addNewUser(AppUser user);
+    void saveUsers(List<AppUser> users);
 
     AppUser addUser(AppUser user);
 
