@@ -1,16 +1,11 @@
 package com.aevw.app.service.transaction;
 
 import com.aevw.app.entity.UserTransaction;
-import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.repository.UserTransactionRepository;
-import com.aevw.app.service.user.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 @SpringBootTest
 class TransactionServiceImplementationCreateTransactionMethodTest {
@@ -163,11 +158,12 @@ class TransactionServiceImplementationCreateTransactionMethodTest {
         String rawEmail ="testMail11@gmail.com";
         Double rawValue = 10.0;
         String rawType = "Test_Type";
+        Double unexpected = 5.0;
 
         transactionServiceImplementation.createTransaction(rawEmail,rawValue,rawType);
         UserTransaction userTransactionTest = userTransactionRepository.findByEmail(rawEmail);
 
-        Assertions.assertNotSame("10",userTransactionTest.getMoney());
+        Assertions.assertNotSame(unexpected,userTransactionTest.getMoney());
     }
 
 
