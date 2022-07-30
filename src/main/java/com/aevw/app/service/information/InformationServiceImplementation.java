@@ -3,6 +3,7 @@ package com.aevw.app.service.information;
 import com.aevw.app.api.response.APIResponse;
 import com.aevw.app.entity.AppUser;
 import com.aevw.app.entity.UserToken;
+import com.aevw.app.entity.dto.InformationBalanceOutputDTO;
 import com.aevw.app.entity.dto.InformationInputDTO;
 import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.repository.UserRepository;
@@ -87,7 +88,11 @@ public class InformationServiceImplementation implements InformationService{
 
             MonetaryAmount convertedMoney = money.with(conversion);
 
-            apiResponse.setData(convertedMoney.toString());
+            InformationBalanceOutputDTO balanceResponse = new InformationBalanceOutputDTO();
+
+            balanceResponse.setBalance(convertedMoney.getNumber());
+
+            apiResponse.setData(balanceResponse);
 
         }
 
