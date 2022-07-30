@@ -2,20 +2,11 @@ package com.aevw.app.api.controller;
 
 import com.aevw.app.api.response.APIResponse;
 import com.aevw.app.api.response.APITransactionsSumaryResponse;
-import com.aevw.app.entity.AppUser;
-import com.aevw.app.entity.UserToken;
-import com.aevw.app.entity.dto.TransactionActions;
+import com.aevw.app.entity.dto.TransactionInputDTO;
 import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.service.transaction.TransactionService;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
 
 @RestController
 @RequestMapping(path = "/transactions")
@@ -30,10 +21,10 @@ public class TransactionController {
 
     @PostMapping("/fill")
     public ResponseEntity<APIResponse> fillTransaction(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-                                                       @RequestBody TransactionActions transactionActions){
+                                                       @RequestBody TransactionInputDTO transactionInputDTO){
 
         try{
-            APIResponse apiResponse = transactionService.fill(auth,transactionActions.getValue().doubleValue());
+            APIResponse apiResponse = transactionService.fill(auth, transactionInputDTO.getValue().doubleValue());
 
             return ResponseEntity
                     .status(apiResponse.getStatus())
@@ -46,10 +37,10 @@ public class TransactionController {
 
     @PostMapping("/withdraw")
     public ResponseEntity<APIResponse> withdrawTransaction(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-                                                            @RequestBody TransactionActions transactionActions){
+                                                            @RequestBody TransactionInputDTO transactionInputDTO){
 
         try{
-            APIResponse apiResponse = transactionService.withdraw(auth,transactionActions.getValue().doubleValue());
+            APIResponse apiResponse = transactionService.withdraw(auth, transactionInputDTO.getValue().doubleValue());
 
             return ResponseEntity
                     .status(apiResponse.getStatus())
@@ -62,12 +53,12 @@ public class TransactionController {
 
     @PostMapping("/pay")
     public ResponseEntity<APIResponse> payTransaction(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-                                                       @RequestBody TransactionActions transactionActions){
+                                                       @RequestBody TransactionInputDTO transactionInputDTO){
 
         try{
             APIResponse apiResponse = transactionService.pay(auth,
-                                                        transactionActions.getValue().doubleValue(),
-                                                        transactionActions.getEmail());
+                                                        transactionInputDTO.getValue().doubleValue(),
+                                                        transactionInputDTO.getEmail());
 
             return ResponseEntity
                     .status(apiResponse.getStatus())
@@ -80,13 +71,13 @@ public class TransactionController {
 
     @GetMapping()
     public ResponseEntity<APITransactionsSumaryResponse> getTransactions(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-                                                                         @RequestBody TransactionActions transactionActions) {
+                                                                         @RequestBody TransactionInputDTO transactionInputDTO) {
 
         try{
             APITransactionsSumaryResponse apiResponse = transactionService.getTransactions(
                     auth,
-                    transactionActions.getStart_date(),
-                    transactionActions.getEnd_date());
+                    transactionInputDTO.getStart_date(),
+                    transactionInputDTO.getEnd_date());
 
         return ResponseEntity
                 .status(apiResponse.getStatus())
