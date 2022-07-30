@@ -1,16 +1,16 @@
 package com.aevw.app.entity.dto;
 
-public class InformationActions {
+public class InformationInputDTO {
     private String currency;
 
     private String start_date;
 
     private String end_date;
 
-    public InformationActions() {
+    public InformationInputDTO() {
     }
 
-    public InformationActions(String currency, String start_date, String end_date) {
+    public InformationInputDTO(String currency, String start_date, String end_date) {
         this.currency = currency;
         this.start_date = start_date;
         this.end_date = end_date;

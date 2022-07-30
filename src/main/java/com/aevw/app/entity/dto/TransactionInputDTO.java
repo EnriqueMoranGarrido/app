@@ -2,7 +2,7 @@ package com.aevw.app.entity.dto;
 
 import javax.validation.constraints.*;
 
-public class TransactionActions {
+public class TransactionInputDTO {
     @NotNull
     @NotBlank(message = "Value is mandatory")
     private Integer value;
@@ -13,23 +13,23 @@ public class TransactionActions {
 
     private String end_date;
 
-    public TransactionActions() {
+    public TransactionInputDTO() {
     }
 
-    public TransactionActions(Integer value) {
+    public TransactionInputDTO(Integer value) {
         this.value = value;
     }
 
-    public TransactionActions(Integer value, String email) {
+    public TransactionInputDTO(Integer value, String email) {
         this.value = value;
         this.email = email;
     }
 
-    public TransactionActions(String email) {
+    public TransactionInputDTO(String email) {
         this.email = email;
     }
 
-    public TransactionActions(String start_date, String end_date) {
+    public TransactionInputDTO(String start_date, String end_date) {
         this.start_date = start_date;
         this.end_date = end_date;
     }
