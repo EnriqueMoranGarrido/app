@@ -1,51 +1,46 @@
 package com.aevw.app.api.controller;
 
 import com.aevw.app.api.response.APIResponse;
-import com.aevw.app.entity.dto.InformationActions;
+import com.aevw.app.entity.dto.InformationInputDTO;
+import com.aevw.app.service.information.InformationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.money.Monetary;
-import javax.money.MonetaryAmount;
-import javax.money.convert.CurrencyConversion;
-import javax.money.convert.MonetaryConversions;
 
 @RestController
 @RequestMapping(path = "/information")
 public class InformationController {
 
+    private final InformationService informationService;
+
+    public InformationController(InformationService informationService) {
+        this.informationService = informationService;
+    }
+
 
     @GetMapping("/balance")
     public ResponseEntity<Object> getBalance(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-                                             @RequestBody InformationActions balance){
+                                             @RequestBody InformationInputDTO balance){
 
-        APIResponse apiResponse = new APIResponse();
-        apiResponse.setData(balance.getCurrency());
+        APIResponse apiResponse = informationService.balance(auth,balance);
 
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse.getData());
     }
 
     @GetMapping("/summary")
     public ResponseEntity<Object> getSummary(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-                                             @RequestBody InformationActions summary){
+                                             @RequestBody InformationInputDTO summary){
 
         APIResponse apiResponse = new APIResponse();
         apiResponse.setData(summary.getCurrency()+summary.getStart_date()+summary.getEnd_date());
 
-        MonetaryAmount money = Monetary.getDefaultAmountFactory().setCurrency("USD").setNumber(100).create();
 
-        CurrencyConversion conversion = MonetaryConversions.getConversion(summary.getCurrency());
-
-        MonetaryAmount convertedMoney = money.with(conversion);
-
-
-        return ResponseEntity.status(HttpStatus.OK).body(convertedMoney.toString());
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
 
     @GetMapping("/series")
     public ResponseEntity<Object> getSeries(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-                                             @RequestBody InformationActions series){
+                                             @RequestBody InformationInputDTO series){
 
         APIResponse apiResponse = new APIResponse();
         apiResponse.setData(series.getCurrency()+series.getEnd_date()+series.getStart_date());
