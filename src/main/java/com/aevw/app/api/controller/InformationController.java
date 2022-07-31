@@ -1,7 +1,7 @@
 package com.aevw.app.api.controller;
 
 import com.aevw.app.api.response.APIResponse;
-import com.aevw.app.entity.dto.InformationInputDTO;
+import com.aevw.app.entity.dto.information.InformationInputDTO;
 import com.aevw.app.service.information.InformationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

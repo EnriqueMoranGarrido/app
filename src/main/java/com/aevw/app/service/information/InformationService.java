@@ -1,7 +1,7 @@
 package com.aevw.app.service.information;
 
 import com.aevw.app.api.response.APIResponse;
-import com.aevw.app.entity.dto.InformationInputDTO;
+import com.aevw.app.entity.dto.information.InformationInputDTO;
 
 public interface InformationService {
 

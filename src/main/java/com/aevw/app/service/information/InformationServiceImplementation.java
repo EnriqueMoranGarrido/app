@@ -4,9 +4,9 @@ import com.aevw.app.api.response.APIResponse;
 import com.aevw.app.entity.AppUser;
 import com.aevw.app.entity.UserToken;
 import com.aevw.app.entity.UserTransaction;
-import com.aevw.app.entity.dto.InformationBalanceOutputDTO;
-import com.aevw.app.entity.dto.InformationInputDTO;
-import com.aevw.app.entity.dto.InformationSummaryOutputDTO;
+import com.aevw.app.entity.dto.information.InformationBalanceOutputDTO;
+import com.aevw.app.entity.dto.information.InformationInputDTO;
+import com.aevw.app.entity.dto.information.InformationSummaryOutputDTO;
 import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.repository.UserRepository;
 import com.aevw.app.repository.UserTokenRepository;
@@ -213,6 +213,53 @@ public class InformationServiceImplementation implements InformationService{
     ////////////////////////////              SERIES             ////////////////////////////
     @Override
     public APIResponse series(String token, InformationInputDTO series) {
-        return null;
+        // Create new API Response
+        APIResponse apiResponse = new APIResponse();
+
+        // Transform the start and end dates from Strings to Integers
+        ArrayList<Integer> dates = getDates(series.getStart_date(),series.getEnd_date());
+
+        // Create an Optional with the AppUser to get the user by token
+        Optional<AppUser> verifyTokenAndGetUser = verifyToken(token);
+
+        // If the token is valid:
+        if(verifyTokenAndGetUser.isPresent()){
+
+            // Create new user with user received for clearer variable use
+            AppUser myUser = verifyTokenAndGetUser.get();
+
+            // Get the transactions between the provided dates for this user
+            List<UserTransaction> transactions = userTransactionRepository.findAllByDateTimeBetweenAndEmail(
+                    LocalDateTime.of(dates.get(0),dates.get(1),dates.get(2),0,0,0) .toString(),
+                    LocalDateTime.of(dates.get(3),dates.get(4),dates.get(5),23,59,59) .toString(),
+                    myUser.getEmail());
+
+            // Create response for the summary
+            InformationSummaryOutputDTO responseSummary = new InformationSummaryOutputDTO();
+
+            // For every transaction in the transactions queried:
+            for (UserTransaction transaction: transactions
+            ) {
+
+                // Create the Double value using the monetary conversion
+                Double transactionDouble = Double.parseDouble(
+                        getMonetaryValue(series.getCurrency(),transaction.getMoney())
+                                .toString());
+
+                // Add the transaction value to each parameter depending on its type
+                switch (transaction.getType()) {
+                    case "payment_fill" -> responseSummary.setFilled(responseSummary.getFilled() + transactionDouble);
+                    case "payment_withdraw" ->
+                            responseSummary.setWithdrawn(responseSummary.getWithdrawn() + transactionDouble);
+                    case "payment_made" ->
+                            responseSummary.setPayments_made(responseSummary.getPayments_made() + transactionDouble);
+                    case "payment_received" ->
+                            responseSummary.setPayments_received(responseSummary.getPayments_received() + transactionDouble);
+                }
+            }
+            apiResponse.setData(responseSummary);
+        }
+
+        return apiResponse;
     }
 }

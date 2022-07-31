@@ -3,7 +3,7 @@ package com.aevw.app.service.transaction;
 import com.aevw.app.api.response.APIResponse;
 import com.aevw.app.api.response.APITransactionsSumaryResponse;
 import com.aevw.app.entity.AppUser;
-import com.aevw.app.entity.dto.TransactionsDTO;
+import com.aevw.app.entity.dto.transaction.TransactionsDTO;
 import com.aevw.app.entity.UserToken;
 import com.aevw.app.entity.UserTransaction;
 import com.aevw.app.exception.ApiRequestException;

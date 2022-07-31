@@ -1,4 +1,4 @@
-package com.aevw.app.entity.dto;
+package com.aevw.app.entity.dto.information;
 
 public class InformationInputDTO {
     private String currency;

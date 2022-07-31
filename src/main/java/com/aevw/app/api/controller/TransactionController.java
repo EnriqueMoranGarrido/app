@@ -2,7 +2,7 @@ package com.aevw.app.api.controller;
 
 import com.aevw.app.api.response.APIResponse;
 import com.aevw.app.api.response.APITransactionsSumaryResponse;
-import com.aevw.app.entity.dto.TransactionInputDTO;
+import com.aevw.app.entity.dto.transaction.TransactionInputDTO;
 import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.service.transaction.TransactionService;
 import org.springframework.http.ResponseEntity;
