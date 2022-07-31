@@ -31,9 +31,7 @@ public class InformationController {
     public ResponseEntity<Object> getSummary(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
                                              @RequestBody InformationInputDTO summary){
 
-        APIResponse apiResponse = new APIResponse();
-        apiResponse.setData(summary.getCurrency()+summary.getStart_date()+summary.getEnd_date());
-
+        APIResponse apiResponse = informationService.summary(auth,summary);
 
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }

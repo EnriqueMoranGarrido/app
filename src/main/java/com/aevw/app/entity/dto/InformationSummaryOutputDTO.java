@@ -1,57 +1,55 @@
 package com.aevw.app.entity.dto;
 
-import javax.money.NumberValue;
-
 public class InformationSummaryOutputDTO {
 
-    NumberValue payments_received;
+    Double payments_received = 0.0;
 
-    NumberValue payments_made;
+    Double payments_made = 0.0;
 
-    NumberValue withdrawn;
+    Double withdrawn = 0.0;
 
-    NumberValue filled;
+    Double filled = 0.0;
 
     public InformationSummaryOutputDTO() {
 
     }
 
-    public InformationSummaryOutputDTO(NumberValue payments_received, NumberValue payments_made, NumberValue withdrawn, NumberValue filled) {
+    public InformationSummaryOutputDTO(Double payments_received, Double payments_made, Double withdrawn, Double filled) {
         this.payments_received = payments_received;
         this.payments_made = payments_made;
         this.withdrawn = withdrawn;
         this.filled = filled;
     }
 
-    public NumberValue getPayments_received() {
+    public Double getPayments_received() {
         return payments_received;
     }
 
-    public void setPayments_received(NumberValue payments_received) {
+    public void setPayments_received(Double payments_received) {
         this.payments_received = payments_received;
     }
 
-    public NumberValue getPayments_made() {
+    public Double getPayments_made() {
         return payments_made;
     }
 
-    public void setPayments_made(NumberValue payments_made) {
+    public void setPayments_made(Double payments_made) {
         this.payments_made = payments_made;
     }
 
-    public NumberValue getWithdrawn() {
+    public Double getWithdrawn() {
         return withdrawn;
     }
 
-    public void setWithdrawn(NumberValue withdrawn) {
+    public void setWithdrawn(Double withdrawn) {
         this.withdrawn = withdrawn;
     }
 
-    public NumberValue getFilled() {
+    public Double getFilled() {
         return filled;
     }
 
-    public void setFilled(NumberValue filled) {
+    public void setFilled(Double filled) {
         this.filled = filled;
     }
 
