@@ -2,20 +2,17 @@ package com.aevw.app.service.information;
 
 import com.aevw.app.api.response.APIResponse;
 import com.aevw.app.entity.AppUser;
-import com.aevw.app.entity.UserToken;
 import com.aevw.app.entity.UserTransaction;
 import com.aevw.app.entity.dto.information.InformationBalanceOutputDTO;
 import com.aevw.app.entity.dto.information.InformationInputDTO;
+import com.aevw.app.entity.dto.information.InformationSeriesOutputDTO;
 import com.aevw.app.entity.dto.information.InformationSummaryOutputDTO;
 import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.repository.UserRepository;
 import com.aevw.app.repository.UserTokenRepository;
 import com.aevw.app.repository.UserTransactionRepository;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
+import com.aevw.app.utils.CurrencyConverter;
+import com.aevw.app.utils.TokenVerifier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,31 +38,8 @@ public class InformationServiceImplementation implements InformationService{
     @Autowired private UserTokenRepository userTokenRepository;
     @Autowired private UserTransactionRepository userTransactionRepository;
 
-    //////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////        VERIFY TOKEN         ///////////////////////////////
-    public Optional<AppUser> verifyToken(String token){
-
-        UserToken myUserToken = userTokenRepository.findByToken(token);
-
-        ArrayList<Object> myReturnArray = new ArrayList<>();
-
-        if(myUserToken ==null){
-            throw new ApiRequestException("Token not found, try again");
-        }
-        try {
-            Algorithm algorithm = Algorithm.HMAC256("secret"); //use more secure key
-            JWTVerifier verifier = JWT.require(algorithm)
-                    .withIssuer(myUserToken.getUserEmail())
-                    .build(); //Reusable verifier instance
-            DecodedJWT jwt = verifier.verify(token);
-
-            return Optional.ofNullable(userRepository.findByEmail(myUserToken.getUserEmail()));
-
-        } catch (JWTVerificationException exception){
-            //Invalid signature/claims
-            throw new ApiRequestException("Token not found, try again");
-        }
-    }
+    CurrencyConverter currencyConverter = new CurrencyConverter();
+    TokenVerifier tokenVerifier = new TokenVerifier(userTokenRepository, userRepository);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -120,6 +94,8 @@ public class InformationServiceImplementation implements InformationService{
     }
 
 
+
+
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////           BALANCE            //////////////////////////////
     @Override
@@ -129,7 +105,7 @@ public class InformationServiceImplementation implements InformationService{
         APIResponse apiResponse = new APIResponse();
 
         // Create an Optional with the AppUser to get the user by token
-        Optional<AppUser> verifyTokenAndGetUser = verifyToken(token);
+        Optional<AppUser> verifyTokenAndGetUser = tokenVerifier.verifyToken(token);
 
         // If the token is valid:
         if(verifyTokenAndGetUser.isPresent()){
@@ -138,7 +114,8 @@ public class InformationServiceImplementation implements InformationService{
             AppUser myUser = verifyTokenAndGetUser.get();
 
             // Convert the money stored in the user (USD currency by default) to the requested currency
-            NumberValue convertedMoney = getMonetaryValue(balance.getCurrency(),myUser.getCapital());
+
+            NumberValue convertedMoney = currencyConverter.getMonetaryValue(balance.getCurrency(), myUser.getCapital());
 
             //Create the balance response
             InformationBalanceOutputDTO balanceResponse = new InformationBalanceOutputDTO();
@@ -165,7 +142,7 @@ public class InformationServiceImplementation implements InformationService{
         ArrayList<Integer> dates = getDates(summary.getStart_date(),summary.getEnd_date());
 
         // Create an Optional with the AppUser to get the user by token
-        Optional<AppUser> verifyTokenAndGetUser = verifyToken(token);
+        Optional<AppUser> verifyTokenAndGetUser = tokenVerifier.verifyToken(token);
 
         // If the token is valid:
         if(verifyTokenAndGetUser.isPresent()){
@@ -188,7 +165,7 @@ public class InformationServiceImplementation implements InformationService{
 
                 // Create the Double value using the monetary conversion
                 Double transactionDouble = Double.parseDouble(
-                        getMonetaryValue(summary.getCurrency(),transaction.getMoney())
+                        currencyConverter.getMonetaryValue(summary.getCurrency(), myUser.getCapital())
                                 .toString());
 
                 // Add the transaction value to each parameter depending on its type
@@ -220,44 +197,26 @@ public class InformationServiceImplementation implements InformationService{
         ArrayList<Integer> dates = getDates(series.getStart_date(),series.getEnd_date());
 
         // Create an Optional with the AppUser to get the user by token
-        Optional<AppUser> verifyTokenAndGetUser = verifyToken(token);
+        TokenVerifier tokenVerifier = new TokenVerifier(userTokenRepository, userRepository);
+        Optional<AppUser> verifyTokenAndGetUser = tokenVerifier.verifyToken(token);
 
         // If the token is valid:
-        if(verifyTokenAndGetUser.isPresent()){
+        if(verifyTokenAndGetUser.isPresent()) {
 
             // Create new user with user received for clearer variable use
             AppUser myUser = verifyTokenAndGetUser.get();
 
             // Get the transactions between the provided dates for this user
             List<UserTransaction> transactions = userTransactionRepository.findAllByDateTimeBetweenAndEmail(
-                    LocalDateTime.of(dates.get(0),dates.get(1),dates.get(2),0,0,0) .toString(),
-                    LocalDateTime.of(dates.get(3),dates.get(4),dates.get(5),23,59,59) .toString(),
+                    LocalDateTime.of(dates.get(0), dates.get(1), dates.get(2), 0, 0, 0).toString(),
+                    LocalDateTime.of(dates.get(3), dates.get(4), dates.get(5), 23, 59, 59).toString(),
                     myUser.getEmail());
 
             // Create response for the summary
-            InformationSummaryOutputDTO responseSummary = new InformationSummaryOutputDTO();
+            InformationSeriesOutputDTO seriesResponse = new InformationSeriesOutputDTO();
 
-            // For every transaction in the transactions queried:
-            for (UserTransaction transaction: transactions
-            ) {
 
-                // Create the Double value using the monetary conversion
-                Double transactionDouble = Double.parseDouble(
-                        getMonetaryValue(series.getCurrency(),transaction.getMoney())
-                                .toString());
 
-                // Add the transaction value to each parameter depending on its type
-                switch (transaction.getType()) {
-                    case "payment_fill" -> responseSummary.setFilled(responseSummary.getFilled() + transactionDouble);
-                    case "payment_withdraw" ->
-                            responseSummary.setWithdrawn(responseSummary.getWithdrawn() + transactionDouble);
-                    case "payment_made" ->
-                            responseSummary.setPayments_made(responseSummary.getPayments_made() + transactionDouble);
-                    case "payment_received" ->
-                            responseSummary.setPayments_received(responseSummary.getPayments_received() + transactionDouble);
-                }
-            }
-            apiResponse.setData(responseSummary);
         }
 
         return apiResponse;
