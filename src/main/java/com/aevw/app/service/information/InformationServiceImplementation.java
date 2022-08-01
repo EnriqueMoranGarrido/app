@@ -18,11 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.money.Monetary;
-import javax.money.MonetaryAmount;
 import javax.money.NumberValue;
-import javax.money.convert.CurrencyConversion;
-import javax.money.convert.MonetaryConversions;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,13 +29,9 @@ import java.util.Optional;
 @Slf4j
 public class InformationServiceImplementation implements InformationService{
 
-
-    @Autowired private UserRepository userRepository;
-    @Autowired private UserTokenRepository userTokenRepository;
     @Autowired private UserTransactionRepository userTransactionRepository;
 
     CurrencyConverter currencyConverter = new CurrencyConverter();
-    TokenVerifier tokenVerifier = new TokenVerifier(userTokenRepository, userRepository);
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
@@ -78,54 +70,29 @@ public class InformationServiceImplementation implements InformationService{
         }
         catch (Exception e){
             // Throw exception
-            throw  new ApiRequestException("Invalid data, try again!");
+            throw  new ApiRequestException("Invalid data, try again!",e);
         }
     }
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////           MONETARY VALUE            ///////////////////////////
-
-    public NumberValue getMonetaryValue(String currency, Double userMoney){
-        MonetaryAmount money = Monetary.getDefaultAmountFactory().setCurrency("USD").setNumber(userMoney).create();
-        CurrencyConversion conversion = MonetaryConversions.getConversion(currency);
-
-        return money.with(conversion).getNumber();
-
-    }
-
-
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////           BALANCE            //////////////////////////////
     @Override
-    public APIResponse balance(String token, InformationInputDTO balance) {
+    public APIResponse balance(InformationInputDTO balance, AppUser balanceUser) {
 
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
-        // Create an Optional with the AppUser to get the user by token
-        Optional<AppUser> verifyTokenAndGetUser = tokenVerifier.verifyToken(token);
+        // Convert the money stored in the user (USD currency by default) to the requested currency
+        NumberValue convertedMoney = currencyConverter.getMonetaryValue(balance.getCurrency(), balanceUser.getCapital());
 
-        // If the token is valid:
-        if(verifyTokenAndGetUser.isPresent()){
+        //Create the balance response
+        InformationBalanceOutputDTO balanceResponse = new InformationBalanceOutputDTO();
 
-            // Create new user with user received for clearer variable use
-            AppUser myUser = verifyTokenAndGetUser.get();
+        // Store the converted amount in the balance response
+        balanceResponse.setBalance(convertedMoney);
 
-            // Convert the money stored in the user (USD currency by default) to the requested currency
-
-            NumberValue convertedMoney = currencyConverter.getMonetaryValue(balance.getCurrency(), myUser.getCapital());
-
-            //Create the balance response
-            InformationBalanceOutputDTO balanceResponse = new InformationBalanceOutputDTO();
-
-            // Store the converted amount in the balance response
-            balanceResponse.setBalance(convertedMoney);
-
-            apiResponse.setData(balanceResponse);
-
-        }
+        apiResponse.setData(balanceResponse);
 
         return apiResponse;
     }
@@ -134,53 +101,42 @@ public class InformationServiceImplementation implements InformationService{
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////           SUMMARY            //////////////////////////////
     @Override
-    public APIResponse summary(String token, InformationInputDTO summary) {
+    public APIResponse summary(InformationInputDTO summary, AppUser summaryUser) {
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
         // Transform the start and end dates from Strings to Integers
         ArrayList<Integer> dates = getDates(summary.getStart_date(),summary.getEnd_date());
 
-        // Create an Optional with the AppUser to get the user by token
-        Optional<AppUser> verifyTokenAndGetUser = tokenVerifier.verifyToken(token);
+        // Get the transactions between the provided dates for this user
+        List<UserTransaction> transactions = userTransactionRepository.findAllByDateTimeBetweenAndEmail(
+                LocalDateTime.of(dates.get(0),dates.get(1),dates.get(2),0,0,0) .toString(),
+                LocalDateTime.of(dates.get(3),dates.get(4),dates.get(5),23,59,59) .toString(),
+                summaryUser.getEmail());
 
-        // If the token is valid:
-        if(verifyTokenAndGetUser.isPresent()){
+        // Create response for the summary
+        InformationSummaryOutputDTO responseSummary = new InformationSummaryOutputDTO();
 
-            // Create new user with user received for clearer variable use
-            AppUser myUser = verifyTokenAndGetUser.get();
+        // For every transaction in the transactions queried:
+        for (UserTransaction transaction: transactions
+        ) {
+            // Create the Double value using the monetary conversion
+            Double transactionDouble = Double.parseDouble(
+                    currencyConverter.getMonetaryValue(summary.getCurrency(), summaryUser.getCapital())
+                            .toString());
 
-            // Get the transactions between the provided dates for this user
-            List<UserTransaction> transactions = userTransactionRepository.findAllByDateTimeBetweenAndEmail(
-                    LocalDateTime.of(dates.get(0),dates.get(1),dates.get(2),0,0,0) .toString(),
-                    LocalDateTime.of(dates.get(3),dates.get(4),dates.get(5),23,59,59) .toString(),
-                    myUser.getEmail());
-
-            // Create response for the summary
-            InformationSummaryOutputDTO responseSummary = new InformationSummaryOutputDTO();
-
-            // For every transaction in the transactions queried:
-            for (UserTransaction transaction: transactions
-            ) {
-
-                // Create the Double value using the monetary conversion
-                Double transactionDouble = Double.parseDouble(
-                        currencyConverter.getMonetaryValue(summary.getCurrency(), myUser.getCapital())
-                                .toString());
-
-                // Add the transaction value to each parameter depending on its type
-                switch (transaction.getType()) {
-                    case "payment_fill" -> responseSummary.setFilled(responseSummary.getFilled() + transactionDouble);
-                    case "payment_withdraw" ->
-                            responseSummary.setWithdrawn(responseSummary.getWithdrawn() + transactionDouble);
-                    case "payment_made" ->
-                            responseSummary.setPayments_made(responseSummary.getPayments_made() + transactionDouble);
-                    case "payment_received" ->
-                            responseSummary.setPayments_received(responseSummary.getPayments_received() + transactionDouble);
-                }
+            // Add the transaction value to each parameter depending on its type
+            switch (transaction.getType()) {
+                case "payment_fill" -> responseSummary.setFilled(responseSummary.getFilled() + transactionDouble);
+                case "payment_withdraw" ->
+                        responseSummary.setWithdrawn(responseSummary.getWithdrawn() + transactionDouble);
+                case "payment_made" ->
+                        responseSummary.setPayments_made(responseSummary.getPayments_made() + transactionDouble);
+                case "payment_received" ->
+                        responseSummary.setPayments_received(responseSummary.getPayments_received() + transactionDouble);
             }
-            apiResponse.setData(responseSummary);
         }
+        apiResponse.setData(responseSummary);
 
         return apiResponse;
     }
@@ -189,35 +145,21 @@ public class InformationServiceImplementation implements InformationService{
     //////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////              SERIES             ////////////////////////////
     @Override
-    public APIResponse series(String token, InformationInputDTO series) {
+    public APIResponse series(InformationInputDTO series, AppUser seriesUser) {
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
         // Transform the start and end dates from Strings to Integers
         ArrayList<Integer> dates = getDates(series.getStart_date(),series.getEnd_date());
 
-        // Create an Optional with the AppUser to get the user by token
-        TokenVerifier tokenVerifier = new TokenVerifier(userTokenRepository, userRepository);
-        Optional<AppUser> verifyTokenAndGetUser = tokenVerifier.verifyToken(token);
+        // Get the transactions between the provided dates for this user
+        List<UserTransaction> transactions = userTransactionRepository.findAllByDateTimeBetweenAndEmail(
+                LocalDateTime.of(dates.get(0), dates.get(1), dates.get(2), 0, 0, 0).toString(),
+                LocalDateTime.of(dates.get(3), dates.get(4), dates.get(5), 23, 59, 59).toString(),
+                seriesUser.getEmail());
 
-        // If the token is valid:
-        if(verifyTokenAndGetUser.isPresent()) {
-
-            // Create new user with user received for clearer variable use
-            AppUser myUser = verifyTokenAndGetUser.get();
-
-            // Get the transactions between the provided dates for this user
-            List<UserTransaction> transactions = userTransactionRepository.findAllByDateTimeBetweenAndEmail(
-                    LocalDateTime.of(dates.get(0), dates.get(1), dates.get(2), 0, 0, 0).toString(),
-                    LocalDateTime.of(dates.get(3), dates.get(4), dates.get(5), 23, 59, 59).toString(),
-                    myUser.getEmail());
-
-            // Create response for the summary
-            InformationSeriesOutputDTO seriesResponse = new InformationSeriesOutputDTO();
-
-
-
-        }
+        // Create response for the summary
+        InformationSeriesOutputDTO seriesResponse = new InformationSeriesOutputDTO();
 
         return apiResponse;
     }
