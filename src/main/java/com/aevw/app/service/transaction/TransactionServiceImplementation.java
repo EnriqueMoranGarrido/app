@@ -4,17 +4,10 @@ import com.aevw.app.api.response.APIResponse;
 import com.aevw.app.api.response.APITransactionsSumaryResponse;
 import com.aevw.app.entity.AppUser;
 import com.aevw.app.entity.dto.transaction.TransactionsDTO;
-import com.aevw.app.entity.UserToken;
 import com.aevw.app.entity.UserTransaction;
 import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.repository.UserRepository;
-import com.aevw.app.repository.UserTokenRepository;
 import com.aevw.app.repository.UserTransactionRepository;
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional
@@ -31,35 +24,8 @@ import java.util.Optional;
 public class TransactionServiceImplementation implements TransactionService{
 
     @Autowired private UserRepository userRepository;
-    @Autowired private UserTokenRepository userTokenRepository;
     @Autowired private UserTransactionRepository userTransactionRepository;
 
-
-    //////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////        VERIFY TOKEN         ///////////////////////////////
-    public Optional<AppUser> verifyToken(String token){
-
-        UserToken myUserToken = userTokenRepository.findByToken(token);
-
-        ArrayList<Object> myReturnArray = new ArrayList<>();
-
-        if(myUserToken ==null){
-            throw new ApiRequestException("Token not found, try again");
-        }
-        try {
-            Algorithm algorithm = Algorithm.HMAC256("secret"); //use more secure key
-            JWTVerifier verifier = JWT.require(algorithm)
-                    .withIssuer(myUserToken.getUserEmail())
-                    .build(); //Reusable verifier instance
-            DecodedJWT jwt = verifier.verify(token);
-
-            return Optional.ofNullable(userRepository.findByEmail(myUserToken.getUserEmail()));
-
-        } catch (JWTVerificationException exception){
-            //Invalid signature/claims
-            throw new ApiRequestException("Token not found, try again");
-        }
-    }
 
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////        CREATE TRANSACTION         ////////////////////////////
@@ -124,107 +90,78 @@ public class TransactionServiceImplementation implements TransactionService{
     //////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////        FILL         ////////////////////////////////////
     @Override
-    public APIResponse fill(String token, Double value) {
+    public APIResponse fill(AppUser fillUser, Double value) throws InterruptedException {
 
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
-        // Create an Optional with the AppUser to get the user by token
-        Optional<AppUser> verifyTokenAndGetUser = verifyToken(token);
+        // Set the capital of the user
+        fillUser.setCapital(fillUser.getCapital()+value);
 
-        // If the token is valid:
-        if(verifyTokenAndGetUser.isPresent()){
+        createTransaction(fillUser.getEmail(),value,"payment_fill");
 
-            // Create new user with user received for clearer variable use
-            AppUser myUserToFill = verifyTokenAndGetUser.get();
+        TimeUnit.SECONDS.sleep(1);
 
-            // Set the capital of the user
-            myUserToFill.setCapital(myUserToFill.getCapital()+value);
-
-            createTransaction(myUserToFill.getEmail(),value,"payment_fill");
-
-            // Set the api response data
-            apiResponse.setData(value + " were added to " + myUserToFill.getEmail()
-                                                      + " . Total capital: " + myUserToFill.getCapital());
-            // return the api response
-            return apiResponse;
-        }
-
-        // throw API request exception
-        throw new ApiRequestException("Could not fulfill transaction");
+        // Set the api response data
+        apiResponse.setData(value + " were added to " + fillUser.getEmail()
+                                                      + " . Total capital: " + fillUser.getCapital());
+        // return the api response
+        return apiResponse;
     }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////        WITHDRAW         //////////////////////////////////
     @Override
-    public APIResponse withdraw(String token, Double value) {
+    public APIResponse withdraw(AppUser withdrawUser, Double value) throws InterruptedException {
 
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
-        // Create an Optional with the AppUser to get the user by token
-        Optional<AppUser> verifyTokenAndGetUser = verifyToken(token);
+        // If the user's capital is greater than the withdrawal requested:
+            if(withdrawUser.getCapital() >= value){
 
-        // If the token is valid:
-        if(verifyTokenAndGetUser.isPresent()){
+                // Create withdrawn transaction
+                createTransaction(withdrawUser.getEmail(),value,"payment_withdraw");
 
-            // Create new user with user received for clearer variable use
-            AppUser myUserToWithdraw = verifyTokenAndGetUser.get();
-
-            // If the user's capital is greater than the withdrawal requested:
-            if(myUserToWithdraw.getCapital() >= value){
+                TimeUnit.SECONDS.sleep(1);
 
                 // Set the capital of the user
-                myUserToWithdraw.setCapital(myUserToWithdraw.getCapital()-value);
-
-                createTransaction(myUserToWithdraw.getEmail(),value,"payment_withdraw");
+                withdrawUser.setCapital(withdrawUser.getCapital()-value);
 
                 // Set the api response data
-                apiResponse.setData(value + " were withdrawn to " + myUserToWithdraw.getEmail()
-                        + " . Total capital: " + myUserToWithdraw.getCapital());
-
-                // return the api response
-                return apiResponse;
+                apiResponse.setData(value + " were withdrawn to " + withdrawUser.getEmail()
+                        + " . Total capital: " + withdrawUser.getCapital());
             }
-        }
-
-        // throw API request exception
-        throw new ApiRequestException("Could not fulfill transaction");
+        // return the api response
+        return apiResponse;
     }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////        PAY         ////////////////////////////////////
     @Override
-    public APIResponse pay(String token, Double value, String email) {
+    public APIResponse pay(AppUser userPay, Double value, String email) throws InterruptedException {
 
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
-        // Create an Optional with the AppUser to get the user by token
-        Optional<AppUser> verifyTokenAndGetUser = verifyToken(token);
-
-        // If the token is valid:
-        if(verifyTokenAndGetUser.isPresent()){
-
-            // Create new user with user received for clearer variable use
-            AppUser userPaying = verifyTokenAndGetUser.get();
-
-            // if the capital of the user making the payment is greater than the payment value:
-            if(userPaying.getCapital() > value){
+        // if the capital of the user making the payment is greater than the payment value:
+            if(userPay.getCapital() >= value){
 
                 // Finding the user that will receive the payment
                 AppUser userBeingPaid = userRepository.findByEmail(email);
 
                 // Verify if the user being paid exists, and it's not the same user making the payment.
-                if(userBeingPaid != null && !(userBeingPaid.getEmail().equals(userPaying.getEmail()))){
+                if(userBeingPaid != null && !(userBeingPaid.getEmail().equals(userPay.getEmail()))){
 
                     // Set the capital of the user making the payment
-                    userPaying.setCapital(userPaying.getCapital()-value);
+                    userPay.setCapital(userPay.getCapital()-value);
 
                     // Creating a new transaction for the user making the payment
-                    createTransaction(userPaying.getEmail(),value,"payment_made");
+                    createTransaction(userPay.getEmail(),value,"payment_made");
+
+                    TimeUnit.SECONDS.sleep(1);
 
                     // Set the capital of the user receiving the payment
                     userBeingPaid.setCapital(userBeingPaid.getCapital()+value);
@@ -232,23 +169,22 @@ public class TransactionServiceImplementation implements TransactionService{
                     // Creating a new transaction for the user receiving the payment
                     createTransaction(userBeingPaid.getEmail(),value,"payment_received");
 
+                    TimeUnit.SECONDS.sleep(1);
+
                     // Set the api response data
-                    apiResponse.setData(value + " were paid from " + userPaying.getEmail()
-                            + " to " + userBeingPaid.getEmail()+ ". Total capital: " + userPaying.getCapital());
+                    apiResponse.setData(value + " were paid from " + userPay.getEmail()
+                            + " to " + userBeingPaid.getEmail()+ ". Total capital: " + userPay.getCapital());
 
-                    return apiResponse;
                 }
-
             }
-        }
-        throw new ApiRequestException("Could not fulfill transaction");
+        return apiResponse;
     }
 
 
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////        GET         ////////////////////////////////////
     @Override
-    public APITransactionsSumaryResponse getTransactions(String token, String start_date, String end_date) {
+    public APITransactionsSumaryResponse getTransactions(AppUser userSummary, String start_date, String end_date) {
 
         // Transform the start and end dates from Strings to Integers
         ArrayList<Integer> dates = getDates(start_date,end_date);
@@ -256,36 +192,27 @@ public class TransactionServiceImplementation implements TransactionService{
         // Create new API Response
         APITransactionsSumaryResponse transactionResponse = new APITransactionsSumaryResponse();
 
-        // Create an Optional with the AppUser to get the user by token
-        Optional<AppUser> verifyTokenAndGetUser = verifyToken(token);
+        // Get the transactions between the provided dates for this user
+        List<UserTransaction> transactions = userTransactionRepository.findAllByDateTimeBetweenAndEmail(
+                LocalDateTime.of(dates.get(0),dates.get(1),dates.get(2),0,0,0) .toString(),
+                LocalDateTime.of(dates.get(3),dates.get(4),dates.get(5),23,59,59) .toString(),
+                userSummary.getEmail());
 
-        // If the token is valid:
-        if(verifyTokenAndGetUser.isPresent()){
+        ArrayList<TransactionsDTO> myResponseTransactions = new ArrayList<>();
 
-            // Create new user with user received for clearer variable use
-            AppUser userRequestionTransactions = verifyTokenAndGetUser.get();
-
-            // Get the transactions between the provided dates for this user
-            List<UserTransaction> transactions = userTransactionRepository.findAllByDateTimeBetweenAndEmail(
-                    LocalDateTime.of(dates.get(0),dates.get(1),dates.get(2),0,0,0) .toString(),
-                    LocalDateTime.of(dates.get(3),dates.get(4),dates.get(5),23,59,59) .toString(),
-                    userRequestionTransactions.getEmail());
-
-            ArrayList<TransactionsDTO> myResponseTransactions = new ArrayList<>();
-
-            for (UserTransaction transaction: transactions
-                 ) {
-                TransactionsDTO transactionsDTO = new TransactionsDTO(
-                        transaction.getDateTime(),
-                        transaction.getType(),
-                        transaction.getMoney()
-                );
-                myResponseTransactions.add(transactionsDTO);
-            }
-
-            // Set the api response
-            transactionResponse.setTransactions(myResponseTransactions);
+        for (UserTransaction transaction: transactions
+        ) {
+            TransactionsDTO transactionsDTO = new TransactionsDTO(
+                    transaction.getDateTime(),
+                    transaction.getType(),
+                    transaction.getMoney()
+            );
+            myResponseTransactions.add(transactionsDTO);
         }
+
+        // Set the api response
+        transactionResponse.setTransactions(myResponseTransactions);
+
         return transactionResponse;
     }
 }
