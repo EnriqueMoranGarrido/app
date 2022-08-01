@@ -38,12 +38,12 @@ public class InformationController {
 
         Optional<AppUser> verifyTokenAndGetUser = tokenVerifier.verifyToken(auth);
 
-        if(verifyTokenAndGetUser.isPresent()){
-            APIResponse apiResponse = informationService.balance(auth,balance, verifyTokenAndGetUser.get());
+        if (verifyTokenAndGetUser.isPresent()) {
+            APIResponse apiResponse = informationService.balance(balance, verifyTokenAndGetUser.get());
             return ResponseEntity.status(HttpStatus.OK).body(apiResponse.getData());
         }
 
-        return null;
+        return ResponseEntity.badRequest().body("Bad request");
     }
 
     @GetMapping("/summary")
@@ -56,20 +56,27 @@ public class InformationController {
         Optional<AppUser> verifyTokenAndGetUser = tokenVerifier.verifyToken(auth);
 
         if(verifyTokenAndGetUser.isPresent()){
-            APIResponse apiResponse = informationService.summary(auth,summary,verifyTokenAndGetUser.get());
+            APIResponse apiResponse = informationService.summary(summary,verifyTokenAndGetUser.get());
 
             return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
         }
-        return null;
+        return ResponseEntity.badRequest().body("Bad request");
     }
 
     @GetMapping("/series")
     public ResponseEntity<Object> getSeries(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
                                              @RequestBody InformationInputDTO series){
 
-        APIResponse apiResponse = new APIResponse();
-        apiResponse.setData(series.getCurrency()+series.getEnd_date()+series.getStart_date());
+        TokenVerifier tokenVerifier = new TokenVerifier(userTokenRepository, userRepository);
 
-        return ResponseEntity.status(HttpStatus.OK).body(apiResponse.getData());
+        Optional<AppUser> verifyTokenAndGetUser = tokenVerifier.verifyToken(auth);
+
+        if(verifyTokenAndGetUser.isPresent()){
+            APIResponse apiResponse = informationService.series(series,verifyTokenAndGetUser.get());
+
+            return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+        }
+
+        return ResponseEntity.badRequest().body("Bad request");
     }
 }
