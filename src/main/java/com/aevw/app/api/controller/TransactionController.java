@@ -31,7 +31,7 @@ public class TransactionController {
                     .body(apiResponse);
 
         }catch (Exception e){
-            throw new ApiRequestException("Sorry, could not fulfill transaction");
+            throw new ApiRequestException("Sorry, could not fulfill transaction",e);
         }
     }
 
@@ -47,7 +47,7 @@ public class TransactionController {
                     .body(apiResponse);
 
         }catch (Exception e){
-            throw new ApiRequestException("Sorry, could not fulfill transaction");
+            throw new ApiRequestException("Sorry, could not fulfill transaction",e);
         }
     }
 
@@ -65,7 +65,7 @@ public class TransactionController {
                     .body(apiResponse);
 
         }catch (Exception e){
-            throw new ApiRequestException("Sorry, could not fulfill transaction");
+            throw new ApiRequestException("Sorry, could not fulfill transaction",e);
         }
     }
 
@@ -84,7 +84,7 @@ public class TransactionController {
                 .body(apiResponse);
 
         }catch (Exception e){
-            throw new ApiRequestException("Sorry, could not fulfill transaction");
+            throw new ApiRequestException("Sorry, could not fulfill transaction",e);
         }
     }
 
