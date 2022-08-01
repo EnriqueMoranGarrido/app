@@ -1,8 +1,17 @@
 package com.aevw.app.entity;
 
-import javax.persistence.*;
+import lombok.*;
+import org.hibernate.Hibernate;
 
-@Entity
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import java.util.Objects;
+
+@Entity @RequiredArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@ToString
 public class UserTransaction {
 
     @Id
@@ -15,9 +24,6 @@ public class UserTransaction {
 
     private String type;
 
-    public UserTransaction() {
-    }
-
     public UserTransaction( String email, Double money, String dateTime, String type) {
         this.dateTime = dateTime;
         this.email = email;
@@ -25,35 +31,16 @@ public class UserTransaction {
         this.type = type;
     }
 
-    public String getEmail() {
-        return email;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        UserTransaction that = (UserTransaction) o;
+        return dateTime != null && Objects.equals(dateTime, that.dateTime);
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public Double getMoney() {
-        return money;
-    }
-
-    public void setMoney(Double money) {
-        this.money = money;
-    }
-
-    public String getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(String dateTime) {
-        this.dateTime = dateTime;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

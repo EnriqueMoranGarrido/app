@@ -1,13 +1,17 @@
 package com.aevw.app.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.*;
+import org.hibernate.Hibernate;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Transient;
+import java.util.Objects;
 
 @Entity
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 public class UserToken {
     @Id
     private String Id;
@@ -22,30 +26,16 @@ public class UserToken {
         this.Id = id;
     }
 
-    public UserToken() {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        UserToken userToken = (UserToken) o;
+        return Id != null && Objects.equals(Id, userToken.Id);
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public String getUserEmail() {
-        return userEmail;
-    }
-
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
-    }
-
-    public String getId() {
-        return Id;
-    }
-
-    public void setId(String id) {
-        Id = id;
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

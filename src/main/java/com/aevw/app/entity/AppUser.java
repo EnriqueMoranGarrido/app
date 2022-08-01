@@ -1,23 +1,22 @@
 package com.aevw.app.entity;
 
-import org.springframework.data.convert.Jsr310Converters;
-import org.springframework.format.annotation.DateTimeFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
+import org.hibernate.Hibernate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.money.Monetary;
-import javax.money.MonetaryAmount;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.validation.constraints.*;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.TimeZone;
+import java.util.Objects;
 
-@Entity
+@Entity @RequiredArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@ToString
 public class AppUser {
 
     @Id
@@ -25,15 +24,17 @@ public class AppUser {
     @NotNull
     @NotBlank(message = "First name is mandatory")
     @Size(min = 2, message = "First name should have at least 2 characters")
-
+    @JsonProperty("first_name")
     private String firstName;
     @NotNull
     @NotBlank(message = "Last name is mandatory")
     @Size(min = 2, message = "Last name should have at least 2 characters")
+    @JsonProperty("last_name")
     private String lastName;
 
     @NotNull
     @Past(message = "Birthdate should be past")
+    @JsonProperty("birth_date")
     private LocalDate birthDate;
 
     @NotNull
@@ -48,12 +49,6 @@ public class AppUser {
 
     private Double capital = 0.0;
 
-    @Transient
-    private MonetaryAmount myMoney;
-
-    public AppUser() {
-
-    }
     public AppUser(String id, String firstName, String lastName, LocalDate birthDate, String email, String password) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         this.id = id;
@@ -62,11 +57,6 @@ public class AppUser {
         this.birthDate = birthDate;
         this.email = email;
         this.password = passwordEncoder.encode(password);
-        this.myMoney = Monetary.getDefaultAmountFactory().setCurrency("USD").setNumber(0.0).create();
-
-    }
-
-    public void setAge(Integer age) {
     }
 
 
@@ -74,41 +64,11 @@ public class AppUser {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public LocalDate getBirthDate() {
-        return birthDate;
-    }
-
-    public void setBirthDate(LocalDate birthDate) {
-        this.birthDate = birthDate;
-    }
 
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
     public String getPassword() {
         return password;
@@ -127,5 +87,16 @@ public class AppUser {
         this.capital = capital;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        AppUser appUser = (AppUser) o;
+        return id != null && Objects.equals(id, appUser.id);
+    }
 
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
