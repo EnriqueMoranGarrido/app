@@ -11,9 +11,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
-import java.util.ArrayList;
 import java.util.Optional;
-
 
 public class TokenVerifier {
 
@@ -30,8 +28,6 @@ public class TokenVerifier {
 
         UserToken myUserToken = userTokenRepository.findByToken(token);
 
-        ArrayList<Object> myReturnArray = new ArrayList<>();
-
         if(myUserToken ==null){
             throw new ApiRequestException("Token not found, try again");
         }
@@ -46,7 +42,7 @@ public class TokenVerifier {
 
         } catch (JWTVerificationException exception){
             //Invalid signature/claims
-            throw new ApiRequestException("Token not found, try again");
+            throw new ApiRequestException("Token not found, try again",exception);
         }
     }
 }
