@@ -8,11 +8,8 @@ import com.aevw.app.entity.dto.information.InformationInputDTO;
 import com.aevw.app.entity.dto.information.InformationSeriesOutputDTO;
 import com.aevw.app.entity.dto.information.InformationSummaryOutputDTO;
 import com.aevw.app.exception.ApiRequestException;
-import com.aevw.app.repository.UserRepository;
-import com.aevw.app.repository.UserTokenRepository;
 import com.aevw.app.repository.UserTransactionRepository;
 import com.aevw.app.utils.CurrencyConverter;
-import com.aevw.app.utils.TokenVerifier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,7 +19,6 @@ import javax.money.NumberValue;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -122,8 +118,9 @@ public class InformationServiceImplementation implements InformationService{
         ) {
             // Create the Double value using the monetary conversion
             Double transactionDouble = Double.parseDouble(
-                    currencyConverter.getMonetaryValue(summary.getCurrency(), summaryUser.getCapital())
+                    currencyConverter.getMonetaryValue(summary.getCurrency(), transaction.getMoney())
                             .toString());
+            System.out.println(transaction.getType());
 
             // Add the transaction value to each parameter depending on its type
             switch (transaction.getType()) {

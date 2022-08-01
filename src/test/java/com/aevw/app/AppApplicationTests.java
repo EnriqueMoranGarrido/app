@@ -29,15 +29,7 @@ class AppApplicationTests {
 
 	@Test
 	public void testCreateUser(){
-		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-		String rawPassword = "example01";
-		String encodedPassword = passwordEncoder.encode(rawPassword);
-
-		AppUser myTestUser =  new AppUser("1","Enrique","en", LocalDate.of(1998,4,12),"kike@gmail.com",encodedPassword);
-
-		AppUser savedUser = userService.addUser(myTestUser);
-		Assertions.assertNotNull(savedUser);
 	}
 
 	@Test
