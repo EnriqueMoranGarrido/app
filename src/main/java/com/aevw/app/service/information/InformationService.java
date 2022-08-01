@@ -6,9 +6,9 @@ import com.aevw.app.entity.dto.information.InformationInputDTO;
 
 public interface InformationService {
 
-    APIResponse balance(String token, InformationInputDTO balance, AppUser balanceUser);
+    APIResponse balance(InformationInputDTO balance, AppUser balanceUser);
 
-    APIResponse summary(String token, InformationInputDTO summary, AppUser summaryUser);
+    APIResponse summary(InformationInputDTO summary, AppUser summaryUser);
 
-    APIResponse series(String token, InformationInputDTO series, AppUser seriesUser);
+    APIResponse series(InformationInputDTO series, AppUser seriesUser);
 }
