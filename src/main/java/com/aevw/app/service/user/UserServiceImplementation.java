@@ -15,21 +15,13 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.convert.JodaTimeConverters;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 @Service @Transactional @Slf4j
@@ -41,34 +33,11 @@ public class UserServiceImplementation implements UserService {
     @Autowired
     private  UserTokenRepository userTokenRepository;
 
-    @Override
-    public List<AppUser> getUsers() {
-        System.out.println("Fetching all users");
-        log.info("Fetching all users");
-        return userRepository.findAll();
-    }
 
     @Override
     public void saveUsers(List<AppUser> users) {
         log.info("Saving users: {}", users.stream().map(AppUser::getEmail));
         userRepository.saveAll(users);
-    }
-
-    @Override
-    public AppUser addUser(AppUser user) {
-
-        Optional<AppUser> userByEmail = userRepository.findAppUserByEmail(user.getEmail());
-
-        if(userByEmail.isPresent()){
-            throw new ApiRequestException("Email already registered");
-        }
-
-        AppUser myNewUser = userRepository.save(user);
-
-        System.out.println(user.getEmail());
-        System.out.println(user);
-
-        return myNewUser;
     }
 
 

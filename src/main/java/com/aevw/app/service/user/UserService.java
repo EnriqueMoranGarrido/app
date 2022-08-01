@@ -8,11 +8,8 @@ import java.util.List;
 
 public interface UserService {
 
-    List<AppUser> getUsers();
 
     void saveUsers(List<AppUser> users);
-
-    AppUser addUser(AppUser user);
 
     APIResponse signUpNewUser(AppUser user);
 
