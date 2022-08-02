@@ -10,6 +10,7 @@ import com.aevw.app.repository.UserRepository;
 import com.aevw.app.repository.UserTransactionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +43,7 @@ public class TransactionServiceImplementation implements TransactionService{
             TimeUnit.SECONDS.sleep(1);
 
         }catch(Exception e){
-            throw new ApiRequestException("Invalid data, try again");
+            throw new ApiRequestException("Invalid data, try again",e);
         }
     }
 
@@ -83,7 +84,7 @@ public class TransactionServiceImplementation implements TransactionService{
         }
         catch (Exception e){
             // Throw exception
-            throw  new ApiRequestException("Invalid data, try again!");
+            throw  new ApiRequestException("Invalid data, try again!",e);
         }
     }
 
@@ -117,19 +118,21 @@ public class TransactionServiceImplementation implements TransactionService{
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
-        // If the user's capital is greater than the withdrawal requested:
-            if(withdrawUser.getCapital() >= value){
-
-                // Create withdrawn transaction
-                createTransaction(withdrawUser.getEmail(),value,"payment_withdraw");
-
-                // Set the capital of the user
-                withdrawUser.setCapital(withdrawUser.getCapital()-value);
-
-                // Set the api response data
-                apiResponse.setData(value + " were withdrawn to " + withdrawUser.getEmail()
-                        + " . Total capital: " + withdrawUser.getCapital());
+        // If the user's capital is not greater or equal than the withdrawal requested:
+            if(withdrawUser.getCapital() < value){
+                apiResponse.setStatus(HttpStatus.BAD_REQUEST);
+                apiResponse.setData("Could not fulfill transaction");
+                return apiResponse;
             }
+        // Create withdrawn transaction
+        createTransaction(withdrawUser.getEmail(),value,"payment_withdraw");
+
+        // Set the capital of the user
+        withdrawUser.setCapital(withdrawUser.getCapital()-value);
+
+        // Set the api response data
+        apiResponse.setData(value + " were withdrawn to " + withdrawUser.getEmail()
+                + " . Total capital: " + withdrawUser.getCapital());
         // return the api response
         return apiResponse;
     }
@@ -143,33 +146,36 @@ public class TransactionServiceImplementation implements TransactionService{
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
-        // if the capital of the user making the payment is greater than the payment value:
-            if(userPay.getCapital() >= value){
+        // if the capital of the user making the payment is not greater than the payment value:
+        if(userPay.getCapital() < value){
+            apiResponse.setData("Could not fulfill transaction");
+            apiResponse.setStatus(HttpStatus.BAD_REQUEST);
+            return  apiResponse;
+        }
 
-                // Finding the user that will receive the payment
-                AppUser userBeingPaid = userRepository.findByEmail(email);
+        // Finding the user that will receive the payment
+        AppUser userBeingPaid = userRepository.findByEmail(email);
 
-                // Verify if the user being paid exists, and it's not the same user making the payment.
-                if(userBeingPaid != null && !(userBeingPaid.getEmail().equals(userPay.getEmail()))){
+        // Verify if the user being paid exists, and it's not the same user making the payment.
+        if(userBeingPaid != null && !(userBeingPaid.getEmail().equals(userPay.getEmail()))){
 
-                    // Set the capital of the user making the payment
-                    userPay.setCapital(userPay.getCapital()-value);
+            // Set the capital of the user making the payment
+            userPay.setCapital(userPay.getCapital()-value);
 
-                    // Creating a new transaction for the user making the payment
-                    createTransaction(userPay.getEmail(),value,"payment_made");
+            // Creating a new transaction for the user making the payment
+            createTransaction(userPay.getEmail(),value,"payment_made");
 
-                    // Set the capital of the user receiving the payment
-                    userBeingPaid.setCapital(userBeingPaid.getCapital()+value);
+            // Set the capital of the user receiving the payment
+            userBeingPaid.setCapital(userBeingPaid.getCapital()+value);
 
-                    // Creating a new transaction for the user receiving the payment
-                    createTransaction(userBeingPaid.getEmail(),value,"payment_received");
+            // Creating a new transaction for the user receiving the payment
+            createTransaction(userBeingPaid.getEmail(),value,"payment_received");
 
-                    // Set the api response data
-                    apiResponse.setData(value + " were paid from " + userPay.getEmail()
-                            + " to " + userBeingPaid.getEmail()+ ". Total capital: " + userPay.getCapital());
+            // Set the api response data
+            apiResponse.setData(value + " were paid from " + userPay.getEmail()
+                    + " to " + userBeingPaid.getEmail()+ ". Total capital: " + userPay.getCapital());
 
-                }
-            }
+        }
         return apiResponse;
     }
 
