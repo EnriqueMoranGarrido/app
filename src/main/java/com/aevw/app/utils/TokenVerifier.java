@@ -26,6 +26,12 @@ public class TokenVerifier {
 
     public Optional<AppUser> verifyToken(String token){
 
+        try{
+            token = token.split(" ")[1];
+        }catch (IndexOutOfBoundsException exception){
+            throw new IndexOutOfBoundsException();
+        }
+
         UserToken myUserToken = userTokenRepository.findByToken(token);
 
         if(myUserToken ==null){

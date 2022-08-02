@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -26,8 +25,6 @@ public class TransactionServiceImplementation implements TransactionService{
 
     @Autowired private UserRepository userRepository;
     @Autowired private UserTransactionRepository userTransactionRepository;
-
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////        CREATE TRANSACTION         ////////////////////////////
