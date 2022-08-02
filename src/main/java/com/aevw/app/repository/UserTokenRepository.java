@@ -10,8 +10,5 @@ import java.util.Optional;
 @Repository
 public interface UserTokenRepository extends JpaRepository<UserToken,String> {
 
-    @Override
-    Optional<UserToken> findById(String s);
-
     UserToken findByToken(String token);
 }

@@ -14,7 +14,6 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,11 +26,15 @@ import java.util.*;
 @Service @Transactional @Slf4j
 public class UserServiceImplementation implements UserService {
 
-    @Autowired
-    private  UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private  UserTokenRepository userTokenRepository;
+
+    private final UserTokenRepository userTokenRepository;
+
+    public UserServiceImplementation(UserRepository userRepository, UserTokenRepository userTokenRepository) {
+        this.userRepository = userRepository;
+        this.userTokenRepository = userTokenRepository;
+    }
 
 
     @Override
@@ -96,7 +99,7 @@ public class UserServiceImplementation implements UserService {
                 jsonObject.put("token",token);
 
                 // Saving Token in User Token table
-                UserToken myUserToken = new UserToken(token,myUser.getEmail(),myUser.getId());
+                UserToken myUserToken = new UserToken(myUser.getEmail(),token);
                 userTokenRepository.save(myUserToken);
 
                 apiResponse.setData(jsonObject);
@@ -131,7 +134,7 @@ public class UserServiceImplementation implements UserService {
                     .withIssuer(myUserToken.getUserEmail())
                     .build(); //Reusable verifier instance
             DecodedJWT jwt = verifier.verify(token);
-
+            log.info(String.valueOf(jwt));
             myUserToken.setToken("");
             apiResponse.setData("Done, token was invalidated: " + token);
 

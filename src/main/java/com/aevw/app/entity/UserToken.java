@@ -12,26 +12,20 @@ import java.util.Objects;
 @Setter
 @ToString
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class UserToken {
     @Id
-    private String Id;
+    private String userEmail;
 
     private String token;
 
-    private String userEmail;
-
-    public UserToken(String token, String userEmail, String id) {
-        this.token = token;
-        this.userEmail = userEmail;
-        this.Id = id;
-    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         UserToken userToken = (UserToken) o;
-        return Id != null && Objects.equals(Id, userToken.Id);
+        return userEmail != null && Objects.equals(userEmail, userToken.userEmail);
     }
 
     @Override
