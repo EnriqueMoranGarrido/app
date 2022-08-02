@@ -3,7 +3,6 @@ package com.aevw.app.entity;
 import lombok.*;
 import org.hibernate.Hibernate;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import java.util.Objects;
@@ -15,7 +14,6 @@ import java.util.Objects;
 public class UserTransaction {
 
     @Id
-    @Column(name = "date_time", nullable = false)
     private String dateTime;
 
     private String email;

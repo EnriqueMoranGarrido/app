@@ -11,5 +11,4 @@ public interface UserTransactionRepository extends JpaRepository<UserTransaction
 
     UserTransaction findByEmail(String rawEmail);
 
-    UserTransaction findByDateTime(String testDate);
 }

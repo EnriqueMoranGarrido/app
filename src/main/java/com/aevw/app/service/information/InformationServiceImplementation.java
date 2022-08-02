@@ -16,8 +16,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.money.NumberValue;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -120,7 +123,6 @@ public class InformationServiceImplementation implements InformationService{
             Double transactionDouble = Double.parseDouble(
                     currencyConverter.getMonetaryValue(summary.getCurrency(), transaction.getMoney())
                             .toString());
-            System.out.println(transaction.getType());
 
             // Add the transaction value to each parameter depending on its type
             switch (transaction.getType()) {
@@ -146,17 +148,62 @@ public class InformationServiceImplementation implements InformationService{
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
-        // Transform the start and end dates from Strings to Integers
-        ArrayList<Integer> dates = getDates(series.getStart_date(),series.getEnd_date());
+        LocalDate start = LocalDate.parse(series.getStart_date());
+        LocalDate next = LocalDate.parse(series.getEnd_date());
 
-        // Get the transactions between the provided dates for this user
-        List<UserTransaction> transactions = userTransactionRepository.findAllByDateTimeBetweenAndEmail(
-                LocalDateTime.of(dates.get(0), dates.get(1), dates.get(2), 0, 0, 0).toString(),
-                LocalDateTime.of(dates.get(3), dates.get(4), dates.get(5), 23, 59, 59).toString(),
-                seriesUser.getEmail());
+        long days = ChronoUnit.DAYS.between(start, next);
 
-        // Create response for the summary
-        InformationSeriesOutputDTO seriesResponse = new InformationSeriesOutputDTO();
+        InformationSeriesOutputDTO seriesOutputDTO = new InformationSeriesOutputDTO();
+
+        Double[] fillSeries = new Double[ (int) days + 1];
+        Double[] withdrawSeries =  new Double[ (int) days + 1];
+        Double[] paymentMadeSeries = new Double[ (int) days + 1];
+        Double[] paymentReceivedSeries =  new Double[ (int) days + 1];
+        String[] daysSeries = new String[ (int) days + 1];
+
+        Arrays.fill(fillSeries, 0.0);
+        Arrays.fill(withdrawSeries, 0.0);
+        Arrays.fill(paymentMadeSeries, 0.0);
+        Arrays.fill(paymentReceivedSeries, 0.0);
+        Arrays.fill(daysSeries, "");
+
+        for (int i = 0; i <=days ; i++) {
+
+            // Get the transactions between the provided dates for this user
+            List<UserTransaction> transactions = userTransactionRepository.findAllByDateTimeBetweenAndEmail(
+                    start.plusDays(i)+"T00:00:00",
+                    start.plusDays(i)+"T23:59:59",
+                    seriesUser.getEmail());
+
+            if(transactions.isEmpty()){
+                daysSeries[i] = start.plusDays(i).toString();
+            }else{
+                for (UserTransaction transaction:transactions
+                ) {
+                    // Create the Double value using the monetary conversion
+                    double transactionDouble = Double.parseDouble(
+                            currencyConverter.getMonetaryValue(series.getCurrency(), transaction.getMoney())
+                                    .toString());
+
+                    // Add the transaction value to each parameter depending on its type
+                    switch (transaction.getType()) {
+                        case "payment_fill" -> fillSeries[i] += transactionDouble;
+                        case "payment_withdraw" ->withdrawSeries[i] += transactionDouble;
+                        case "payment_made" -> paymentMadeSeries[i] +=  transactionDouble;
+                        case "payment_received" -> paymentReceivedSeries[i] += transactionDouble;
+                    }
+
+                    daysSeries[i] = start.plusDays(i).toString();
+                }
+            }
+        }
+        seriesOutputDTO.setFilled(fillSeries);
+        seriesOutputDTO.setWithdrawn(withdrawSeries);
+        seriesOutputDTO.setPayments_made(paymentMadeSeries);
+        seriesOutputDTO.setPayments_received(paymentReceivedSeries);
+        seriesOutputDTO.setDates(daysSeries);
+
+        apiResponse.setData(seriesOutputDTO);
 
         return apiResponse;
     }

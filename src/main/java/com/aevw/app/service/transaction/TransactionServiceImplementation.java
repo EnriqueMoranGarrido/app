@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +27,7 @@ public class TransactionServiceImplementation implements TransactionService{
     @Autowired private UserRepository userRepository;
     @Autowired private UserTransactionRepository userTransactionRepository;
 
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////        CREATE TRANSACTION         ////////////////////////////
@@ -39,6 +41,8 @@ public class TransactionServiceImplementation implements TransactionService{
                 type);
 
             userTransactionRepository.save(transaction);
+
+            TimeUnit.SECONDS.sleep(1);
 
         }catch(Exception e){
             throw new ApiRequestException("Invalid data, try again");
@@ -90,7 +94,7 @@ public class TransactionServiceImplementation implements TransactionService{
     //////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////        FILL         ////////////////////////////////////
     @Override
-    public APIResponse fill(AppUser fillUser, Double value) throws InterruptedException {
+    public APIResponse fill(AppUser fillUser, Double value){
 
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
@@ -99,8 +103,6 @@ public class TransactionServiceImplementation implements TransactionService{
         fillUser.setCapital(fillUser.getCapital()+value);
 
         createTransaction(fillUser.getEmail(),value,"payment_fill");
-
-        TimeUnit.SECONDS.sleep(1);
 
         // Set the api response data
         apiResponse.setData(value + " were added to " + fillUser.getEmail()
@@ -113,7 +115,7 @@ public class TransactionServiceImplementation implements TransactionService{
     //////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////        WITHDRAW         //////////////////////////////////
     @Override
-    public APIResponse withdraw(AppUser withdrawUser, Double value) throws InterruptedException {
+    public APIResponse withdraw(AppUser withdrawUser, Double value){
 
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
@@ -123,8 +125,6 @@ public class TransactionServiceImplementation implements TransactionService{
 
                 // Create withdrawn transaction
                 createTransaction(withdrawUser.getEmail(),value,"payment_withdraw");
-
-                TimeUnit.SECONDS.sleep(1);
 
                 // Set the capital of the user
                 withdrawUser.setCapital(withdrawUser.getCapital()-value);
@@ -141,7 +141,7 @@ public class TransactionServiceImplementation implements TransactionService{
     //////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////        PAY         ////////////////////////////////////
     @Override
-    public APIResponse pay(AppUser userPay, Double value, String email) throws InterruptedException {
+    public APIResponse pay(AppUser userPay, Double value, String email){
 
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
@@ -161,15 +161,11 @@ public class TransactionServiceImplementation implements TransactionService{
                     // Creating a new transaction for the user making the payment
                     createTransaction(userPay.getEmail(),value,"payment_made");
 
-                    TimeUnit.SECONDS.sleep(1);
-
                     // Set the capital of the user receiving the payment
                     userBeingPaid.setCapital(userBeingPaid.getCapital()+value);
 
                     // Creating a new transaction for the user receiving the payment
                     createTransaction(userBeingPaid.getEmail(),value,"payment_received");
-
-                    TimeUnit.SECONDS.sleep(1);
 
                     // Set the api response data
                     apiResponse.setData(value + " were paid from " + userPay.getEmail()
