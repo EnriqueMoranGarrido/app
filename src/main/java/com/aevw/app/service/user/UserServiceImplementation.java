@@ -97,7 +97,9 @@ public class UserServiceImplementation implements UserService {
                 jsonObject.put("token",token);
 
                 // Saving Token in User Token table
-                UserToken myUserToken = new UserToken(myUser.getEmail(),token);
+                UserToken myUserToken = new UserToken();
+                myUserToken.setUserEmail(myUser.getEmail());
+                myUserToken.setToken(token);
                 userTokenRepository.save(myUserToken);
 
                 apiResponse.setData(jsonObject);

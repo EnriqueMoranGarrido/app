@@ -3,17 +3,18 @@ package com.aevw.app.entity;
 import lombok.*;
 import org.hibernate.Hibernate;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Objects;
 
-@Entity @RequiredArgsConstructor @AllArgsConstructor
+@Entity @RequiredArgsConstructor
 @Getter
 @Setter
 @ToString
 public class UserTransaction {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer transaction_number;
     private String dateTime;
 
     private String email;

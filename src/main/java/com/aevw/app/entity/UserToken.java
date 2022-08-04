@@ -3,8 +3,7 @@ package com.aevw.app.entity;
 import lombok.*;
 import org.hibernate.Hibernate;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
@@ -15,6 +14,8 @@ import java.util.Objects;
 @AllArgsConstructor
 public class UserToken {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer token_id;
     private String userEmail;
 
     private String token;

@@ -32,11 +32,11 @@ public class TransactionServiceImplementation implements TransactionService{
 
     public void createTransaction(String email, Double value, String type){
         try{
-            UserTransaction transaction = new UserTransaction(
-                    LocalDateTime.now().toString(),
-                    email,
-                    value,
-                    type);
+            UserTransaction transaction = new UserTransaction();
+            transaction.setEmail(email);
+            transaction.setDateTime(LocalDateTime.now().toString());
+            transaction.setMoney(value);
+            transaction.setType(type);
 
             userTransactionRepository.save(transaction);
 
@@ -175,7 +175,10 @@ public class TransactionServiceImplementation implements TransactionService{
             apiResponse.setData(value + " were paid from " + userPay.getEmail()
                     + " to " + userBeingPaid.getEmail()+ ". Total capital: " + userPay.getCapital());
 
+            return apiResponse;
         }
+        apiResponse.setData("Sorry, could not fulfill transaction, user receiving the payment is invalid");
+        apiResponse.setStatus(HttpStatus.BAD_REQUEST);
         return apiResponse;
     }
 
