@@ -16,6 +16,10 @@ public class InformationInputDTO {
         this.end_date = end_date;
     }
 
+    public InformationInputDTO(String currency) {
+        this.currency = currency;
+    }
+
     public String getCurrency() {
         return currency;
     }
