@@ -33,10 +33,10 @@ public class TransactionServiceImplementation implements TransactionService{
     public void createTransaction(String email, Double value, String type){
         try{
             UserTransaction transaction = new UserTransaction(
-                email,
-                value,
-                LocalDateTime.now().toString(),
-                type);
+                    LocalDateTime.now().toString(),
+                    email,
+                    value,
+                    type);
 
             userTransactionRepository.save(transaction);
 

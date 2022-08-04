@@ -22,13 +22,6 @@ public class UserTransaction {
 
     private String type;
 
-    public UserTransaction( String email, Double money, String dateTime, String type) {
-        this.dateTime = dateTime;
-        this.email = email;
-        this.money = money;
-        this.type = type;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
