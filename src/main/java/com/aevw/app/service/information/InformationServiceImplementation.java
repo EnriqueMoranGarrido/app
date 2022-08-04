@@ -21,6 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Transactional
@@ -81,6 +82,15 @@ public class InformationServiceImplementation implements InformationService{
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
 
+        // Get Monetary conversion providers
+        Double conversions = currencyConverter.getMonetaryValue("USD",1.0);
+
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         // Convert the money stored in the user (USD currency by default) to the requested currency
         Double convertedMoney = currencyConverter.getMonetaryValue(balance.getCurrency(), balanceUser.getCapital());
 
@@ -102,6 +112,15 @@ public class InformationServiceImplementation implements InformationService{
     public APIResponse summary(InformationInputDTO summary, AppUser summaryUser) {
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
+
+        // Get Monetary conversion providers
+        Double conversions = currencyConverter.getMonetaryValue("USD",1.0);
+
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         // Transform the start and end dates from Strings to Integers
         ArrayList<Integer> dates = getDates(summary.getStart_date(),summary.getEnd_date());
@@ -146,6 +165,15 @@ public class InformationServiceImplementation implements InformationService{
     public APIResponse series(InformationInputDTO series, AppUser seriesUser) {
         // Create new API Response
         APIResponse apiResponse = new APIResponse();
+
+        // Get Monetary conversion providers
+        Double conversions = currencyConverter.getMonetaryValue("USD",1.0);
+
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         LocalDate start = LocalDate.parse(series.getStart_date());
         LocalDate next = LocalDate.parse(series.getEnd_date());

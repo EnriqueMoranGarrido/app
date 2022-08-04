@@ -23,6 +23,8 @@ public class CurrencyConverter {
 
     public Double getMonetaryValue(String currency, Double userMoney){
 
+        getCurrencyExchanges();
+
         CacheLoader<String, String> loader;
         loader = new CacheLoader<>() {
             @Override
@@ -45,5 +47,10 @@ public class CurrencyConverter {
         Double numberValue = money.with(conversion).getNumber().doubleValue();
         currencyMap.put(currency,numberValue);
         return numberValue*userMoney;
+    }
+
+    private void getCurrencyExchanges() {
+        CurrencyConversion conversion = MonetaryConversions.getConversion("USD");
+        Double numberValue = money.with(conversion).getNumber().doubleValue();
     }
 }
