@@ -32,8 +32,9 @@ public class InformationController {
 
     @GetMapping("/balance")
     public ResponseEntity<Object> getBalance(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-                                             @RequestBody InformationInputDTO balance){
+                                             @RequestParam(value = "currency") String currency){
 
+        InformationInputDTO balance = new InformationInputDTO(currency);
         TokenVerifier tokenVerifier = new TokenVerifier(userTokenRepository, userRepository);
 
         Optional<AppUser> verifyTokenAndGetUser = tokenVerifier.verifyToken(auth);
@@ -48,8 +49,11 @@ public class InformationController {
 
     @GetMapping("/summary")
     public ResponseEntity<Object> getSummary(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-                                             @RequestBody InformationInputDTO summary){
+                                             @RequestParam(value = "start_date") String start_date,
+                                             @RequestParam(value = "end_date")  String end_date,
+                                             @RequestParam(value = "currency")  String currency){
 
+        InformationInputDTO summary = new InformationInputDTO(currency,start_date,end_date);
 
         TokenVerifier tokenVerifier = new TokenVerifier(userTokenRepository, userRepository);
 
@@ -65,7 +69,11 @@ public class InformationController {
 
     @GetMapping("/series")
     public ResponseEntity<Object> getSeries(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-                                             @RequestBody InformationInputDTO series){
+                                            @RequestParam(value = "start_date") String start_date,
+                                            @RequestParam(value = "end_date")  String end_date,
+                                            @RequestParam(value = "currency")  String currency){
+
+        InformationInputDTO series = new InformationInputDTO(currency,start_date,end_date);
 
         TokenVerifier tokenVerifier = new TokenVerifier(userTokenRepository, userRepository);
 

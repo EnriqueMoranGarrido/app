@@ -30,8 +30,7 @@ public class TransactionController {
 
     @PostMapping("/fill")
     public ResponseEntity<APIResponse> fillTransaction(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-                                                       @RequestBody TransactionInputDTO transactionInputDTO)
-                                                        throws InterruptedException {
+                                                       @RequestBody TransactionInputDTO transactionInputDTO) {
 
         TokenVerifier tokenVerifier = new TokenVerifier(userTokenRepository, userRepository);
         Optional<AppUser> verifyTokenAndGetUser = tokenVerifier.verifyToken(auth);
@@ -48,7 +47,7 @@ public class TransactionController {
     @PostMapping("/withdraw")
     public ResponseEntity<APIResponse> withdrawTransaction(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
                                                             @RequestBody TransactionInputDTO transactionInputDTO)
-                                                            throws InterruptedException {
+                                                            {
 
 
         TokenVerifier tokenVerifier = new TokenVerifier(userTokenRepository, userRepository);
@@ -69,7 +68,7 @@ public class TransactionController {
     @PostMapping("/pay")
     public ResponseEntity<APIResponse> payTransaction(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
                                                        @RequestBody TransactionInputDTO transactionInputDTO)
-                                                        throws InterruptedException {
+                                                        {
 
         TokenVerifier tokenVerifier = new TokenVerifier(userTokenRepository, userRepository);
         Optional<AppUser> verifyTokenAndGetUser = tokenVerifier.verifyToken(auth);
@@ -85,9 +84,12 @@ public class TransactionController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
     }
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<APITransactionsSumaryResponse> getTransactions(@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-                                                                         @RequestBody TransactionInputDTO transactionInputDTO) {
+                                                                         @RequestParam(value = "start_date") String start_date,
+                                                                         @RequestParam(value = "end_date")  String end_date) {
+
+        TransactionInputDTO transactionInputDTO = new TransactionInputDTO(start_date,end_date);
 
         TokenVerifier tokenVerifier = new TokenVerifier(userTokenRepository, userRepository);
         Optional<AppUser> verifyTokenAndGetUser = tokenVerifier.verifyToken(auth);
