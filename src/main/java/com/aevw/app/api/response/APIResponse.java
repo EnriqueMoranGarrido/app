@@ -1,8 +1,11 @@
 package com.aevw.app.api.response;
 
-import org.json.JSONObject;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.springframework.http.HttpStatus;
 
+@AllArgsConstructor
+@Data
 public class APIResponse {
 
     private HttpStatus status;
@@ -16,34 +19,6 @@ public class APIResponse {
     public APIResponse(Object data, Object error) {
         this.status = HttpStatus.OK;
         this.data = data;
-        this.error = error;
-    }
-
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(HttpStatus status) {
-        this.status = status;
-    }
-
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(Object data) {
-        this.data = data;
-    }
-
-    public void setDataJson(JSONObject data){
-        this.data = data;
-    }
-
-    public Object getError() {
-        return error;
-    }
-
-    public void setError(Object error) {
         this.error = error;
     }
 
