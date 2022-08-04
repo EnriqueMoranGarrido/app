@@ -27,8 +27,6 @@ import java.util.*;
 public class UserServiceImplementation implements UserService {
 
     private final UserRepository userRepository;
-
-
     private final UserTokenRepository userTokenRepository;
 
     public UserServiceImplementation(UserRepository userRepository, UserTokenRepository userTokenRepository) {
@@ -107,7 +105,7 @@ public class UserServiceImplementation implements UserService {
             } catch (JWTCreationException exception){
                 //Invalid Signing configuration / Couldn't convert Claims.
                 System.out.println("An error has ocurred");
-                throw new ApiRequestException("Invalid token, try again");
+                throw new ApiRequestException("Could not log in",exception);
             }
 
         }else {
@@ -120,8 +118,15 @@ public class UserServiceImplementation implements UserService {
 
     public  APIResponse logOUt(String token){
         // Create API response
-
         APIResponse apiResponse = new APIResponse();
+
+        try {
+            token = token.split(" ")[1];
+        }catch (Exception e){
+            apiResponse.setData(e);
+            apiResponse.setStatus(HttpStatus.BAD_REQUEST);
+            return apiResponse;
+        }
         UserToken myUserToken = userTokenRepository.findByToken(token);
 
         if(myUserToken ==null){
@@ -140,8 +145,7 @@ public class UserServiceImplementation implements UserService {
 
         } catch (JWTVerificationException exception){
             //Invalid signature/claims
-            System.out.println("An error has ocurred");
-            throw new ApiRequestException("Invalid token, try again!");
+            throw new ApiRequestException("Invalid token, try again!",exception);
         }
         return apiResponse;
 
