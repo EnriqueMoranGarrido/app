@@ -5,8 +5,6 @@ import com.aevw.app.entity.AppUser;
 import com.aevw.app.entity.dto.information.InformationInputDTO;
 import com.aevw.app.exception.ApiRequestException;
 import com.aevw.app.service.user.UserService;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 class InformationServiceImplementationTest {
+
 
     @Autowired
     UserService userService;
@@ -49,6 +45,8 @@ class InformationServiceImplementationTest {
     private InformationInputDTO CreateInformationInputDTO(@RequestParam(defaultValue = "USD", required = false) String currency){
         InformationInputDTO input = new InformationInputDTO();
         input.setCurrency(currency);
+        input.setStart_date(test_start_date);
+        input.setEnd_date(test_end_date);
         return input;
     }
 
@@ -59,6 +57,8 @@ class InformationServiceImplementationTest {
     }
 
 
+    //////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////              GET DATES              ///////////////////////////
     @Test
     void getDatesNotNull() {
 
@@ -276,7 +276,8 @@ class InformationServiceImplementationTest {
     }
 
 
-
+    //////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////           BALANCE            //////////////////////////////
     @Test
     void balanceResponse_NotNull() {
 
@@ -419,12 +420,4 @@ class InformationServiceImplementationTest {
         Assertions.assertNotNull(realResponse.getData());
     }
 
-
-    @Test
-    void summary() {
-    }
-
-    @Test
-    void series() {
-    }
 }
