@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.money.NumberValue;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -83,7 +82,7 @@ public class InformationServiceImplementation implements InformationService{
         APIResponse apiResponse = new APIResponse();
 
         // Convert the money stored in the user (USD currency by default) to the requested currency
-        NumberValue convertedMoney = currencyConverter.getMonetaryValue(balance.getCurrency(), balanceUser.getCapital());
+        Double convertedMoney = currencyConverter.getMonetaryValue(balance.getCurrency(), balanceUser.getCapital());
 
         //Create the balance response
         InformationBalanceOutputDTO balanceResponse = new InformationBalanceOutputDTO();
