@@ -1,8 +1,9 @@
 package com.aevw.app.api.response;
 
-import org.json.JSONObject;
+import lombok.Data;
 import org.springframework.http.HttpStatus;
 
+@Data
 public class APITransactionsSumaryResponse {
 
     private HttpStatus status;
@@ -19,31 +20,4 @@ public class APITransactionsSumaryResponse {
         this.error = error;
     }
 
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(HttpStatus status) {
-        this.status = status;
-    }
-
-    public Object getTransactions() {
-        return transactions;
-    }
-
-    public void setTransactions(Object transactions) {
-        this.transactions = transactions;
-    }
-
-    public void setDataJson(JSONObject transactions){
-        this.transactions = transactions;
-    }
-
-    public Object getError() {
-        return error;
-    }
-
-    public void setError(Object error) {
-        this.error = error;
-    }
 }
